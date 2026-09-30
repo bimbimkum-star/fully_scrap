@@ -1,0 +1,3448 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#075c43">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>चुपाकाबरा खाता — प्रीमियम डिजिटल गद्दी</title>
+
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="manifest" href="manifest.json">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<style>
+:root {
+  --primary: #075c43;
+  --primary-dark: #043f2e;
+  --primary-light: #08714f;
+  --primary-bg: #f4fbf7;
+  --accent-yellow: #f59e0b;
+  --soft: #eaf5ef;
+  --card: #ffffff;
+  --text: #12352b;
+  --muted: #627d72;
+  --line: #d8eade;
+  --green: #059669;
+  --greenbg: #ecfdf5;
+  --red: #e11d48;
+  --redbg: #fff1f2;
+  --orange: #f59e0b;
+  --shadow-card: 0 10px 28px rgba(7, 92, 67, 0.08);
+  --shadow-float: 0 14px 35px rgba(7, 92, 67, 0.22);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', sans-serif;
+}
+
+html, body {
+  background: var(--primary-bg);
+  color: var(--text);
+  min-height: 100vh;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.app-wrapper {
+  width: min(100%, 480px);
+  min-height: 100vh;
+  margin: auto;
+  background: linear-gradient(180deg, #f9fffc, #eaf5ef);
+  position: relative;
+  overflow-x: hidden;
+  box-shadow: 0 0 50px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 78px;
+}
+
+/* हेडर */
+header.app-top {
+  height: 68px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--line);
+}
+
+.iconbtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  box-shadow: 0 4px 12px rgba(7, 92, 67, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.iconbtn:active { transform: scale(0.92); }
+
+.header-brand-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.header-logo-mini {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 2px solid var(--primary-light);
+  object-fit: cover;
+}
+
+.brand-text {
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--primary);
+  line-height: 1.15;
+}
+
+.brand-text small {
+  display: block;
+  font-size: 9.5px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.vault-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 6px 10px;
+  border-radius: 12px;
+  color: #92400e;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* स्क्रीन व्यू */
+.viewport {
+  padding: 14px 14px 16px;
+  flex: 1;
+}
+
+/* 3-नोड्स ऑर्ब (मंडी रहित) */
+.orb-card {
+  height: 275px;
+  border-radius: 32px;
+  background: radial-gradient(circle at 50% 50%, #ffffff 0 24%, #ddf2e7 25% 48%, #b9e0ce 49% 100%);
+  position: relative;
+  border: 1px solid #d4e9df;
+  box-shadow: 0 16px 36px rgba(7, 92, 67, 0.12);
+  margin-bottom: 16px;
+}
+
+.orb-core-dragon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: #fff;
+  border: 6px solid #e4f4ec;
+  box-shadow: 0 10px 26px rgba(7, 92, 67, 0.18);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.orb-core-dragon img {
+  width: 86px;
+  height: 86px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.node-btn {
+  position: absolute;
+  width: 112px;
+  min-height: 70px;
+  border: 1.5px solid #d5e9df;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(7, 92, 67, 0.08);
+  padding: 8px 4px;
+  text-align: center;
+  font-weight: 800;
+  color: var(--primary);
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  z-index: 6;
+}
+.node-btn:active { transform: scale(0.94); }
+.node-btn span { display: block; font-size: 22px; margin-bottom: 2px; }
+.node-btn small { display: block; color: var(--muted); font-size: 9px; font-weight: 700; }
+
+.n-grahak { left: 16px; top: 18px; }
+.n-bill { right: 16px; top: 18px; }
+.n-bank { left: 50%; transform: translateX(-50%); bottom: 14px; width: 140px; }
+
+/* गद्दी बैलेंस स्ट्रिप */
+.balance-strip {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 14px;
+}
+.b-box { flex: 1; text-align: center; }
+.b-box small { font-size: 10.5px; font-weight: 700; color: var(--muted); display: block; }
+.b-box strong { font-size: 18px; font-weight: 900; display: block; margin-top: 3px; }
+.b-divider { width: 1px; height: 34px; background: var(--line); }
+
+/* कार्ड्स एवं सामान्य लिस्ट */
+.quickgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.action-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 12px;
+  box-shadow: var(--shadow-card);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.action-card:active { transform: scale(0.96); }
+.action-card b { display: block; color: var(--primary); font-size: 13.5px; font-weight: 800; }
+.action-card small { color: var(--muted); font-size: 10px; font-weight: 600; display: block; margin-top: 2px; }
+
+.badge-ico {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #e6f5ed;
+  margin-bottom: 8px;
+  font-size: 19px;
+}
+
+.ledger-trigger-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.customer {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  cursor: pointer;
+}
+
+.left { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.avatar {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 14px;
+  background: var(--soft);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 16px;
+}
+.cname { font-size: 13.5px; font-weight: 800; color: var(--text); }
+.phone { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.right { text-align: right; }
+.amt { font-size: 15px; font-weight: 900; }
+.status { font-size: 10px; font-weight: 700; margin-top: 2px; }
+.receive { color: var(--red); }
+.pay { color: var(--green); }
+.empty {
+  background: #fff;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  padding: 26px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.search {
+  height: 44px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 0 14px;
+  outline: 0;
+  font-size: 12.5px;
+  margin-bottom: 10px;
+}
+
+/* वीडियो जैसा इनपुट और वैलिडेशन क्लास */
+.d-input {
+  width: 100%;
+  height: 42px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 0 12px;
+  font-size: 13px;
+  outline: none;
+  background: #f8fafc;
+  transition: border-color 0.2s;
+}
+.d-input:focus { border-color: var(--primary); background: #fff; }
+.d-input.input-error {
+  border-color: #e11d48 !important;
+  background: #fff1f2 !important;
+}
+.error-text {
+  color: #e11d48;
+  font-size: 10.5px;
+  font-weight: 800;
+  margin-top: 4px;
+  display: none;
+}
+
+/* फोन इनपुट प्रीफ़िक्स बॉक्स (+91) */
+.phone-prefix-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: #f8fafc;
+  overflow: hidden;
+  height: 42px;
+}
+.phone-prefix-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  background: #f1f5f9;
+  border-right: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 800;
+  color: #334155;
+  height: 100%;
+}
+.phone-prefix-wrap input {
+  border: none;
+  background: transparent;
+  padding: 0 10px;
+  height: 100%;
+  width: 100%;
+  outline: none;
+  font-size: 13px;
+}
+
+/* लेज़र स्क्रीन बॉटम बार (खाताबुक स्टाइल) */
+.ledger-fixed-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 480px);
+  background: #ffffff;
+  border-top: 1px solid var(--line);
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  z-index: 105;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+}
+.btn-ledger-give {
+  background: #e11d48;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  height: 46px;
+  font-size: 14px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(225,29,72,0.25);
+}
+.btn-ledger-get {
+  background: #059669;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  height: 46px;
+  font-size: 14px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(5,150,105,0.25);
+}
+
+/* मुंशी जी मैस्कॉट */
+.mascot-wrap {
+  position: fixed;
+  left: calc(50% - 225px);
+  bottom: 84px;
+  z-index: 85;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: none;
+}
+@media (max-width: 480px) { .mascot-wrap { left: 16px; } }
+
+.mascot-bubble {
+  background: #fff;
+  border: 2px solid var(--primary);
+  padding: 8px 12px;
+  border-radius: 16px 16px 16px 2px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+  margin-bottom: 6px;
+  max-width: 220px;
+  display: none;
+  pointer-events: auto;
+  line-height: 1.35;
+}
+
+@keyframes chupaBreathing { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-5px) scale(1.02); } }
+@keyframes chupaSpeaking { 0% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.08) rotate(-3deg); } 75% { transform: scale(1.08) rotate(3deg); } 100% { transform: scale(1) rotate(0deg); } }
+@keyframes chupaShake { 0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(-14deg) scale(0.9); } 40% { transform: rotate(14deg) scale(1.1); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(8deg); } }
+@keyframes chupaJoy { 0%, 100% { transform: translateY(0) scale(1); } 30% { transform: translateY(-16px) scale(1.12); } 60% { transform: translateY(0) scale(0.96); } }
+
+.mascot-container { position: relative; pointer-events: auto; cursor: pointer; }
+.chupa-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--primary);
+  background: #e0f2fe;
+  box-shadow: 0 8px 20px rgba(7,92,67,0.25);
+  display: block;
+  animation: chupaBreathing 2.6s ease-in-out infinite;
+}
+.chupa-avatar.talking { animation: chupaSpeaking 0.35s ease-in-out infinite !important; }
+.chupa-avatar.joy { animation: chupaJoy 0.6s ease-in-out !important; }
+.chupa-avatar.kutai { animation: chupaShake 0.5s ease-in-out !important; border-color: var(--red) !important; }
+.mascot-mute {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #fff;
+  cursor: pointer;
+}
+
+/* बॉटम नेविगेशन */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 480px);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 8px 12px 10px;
+  z-index: 90;
+}
+.nav-item {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  cursor: pointer;
+}
+.nav-item div { font-size: 22px; margin-bottom: 2px; }
+.nav-item.active { color: var(--primary); }
+
+/* मोडल बेसिक्स */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1100;
+}
+.box {
+  width: min(100%, 480px);
+  background: #fff;
+  border-radius: 26px 26px 0 0;
+  padding: 22px 18px 28px;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: left;
+}
+.modalrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.btn-save {
+  height: 46px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn-cancel {
+  height: 46px;
+  border: 0;
+  border-radius: 14px;
+  background: #edf4f0;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 84px;
+  transform: translate(-50%, 20px);
+  background: var(--primary);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s ease;
+  z-index: 2000;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+#universalPrintArea { display: none; }
+@media print {
+  @page { margin: 15mm 10mm 10mm 10mm !important; size: auto; }
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; min-height: 0 !important; }
+  body > *:not(#universalPrintArea) { display: none !important; }
+  #universalPrintArea {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: #fff !important;
+    color: #000 !important;
+    page-break-inside: avoid !important;
+  }
+  .paper-roll { width: 72mm !important; max-width: 72mm !important; min-width: 72mm !important; margin: 0 auto !important; font-size: 11px !important; padding: 8px 6px !important; border: 1px solid #000 !important; page-break-inside: avoid !important; }
+  .paper-a4 { width: 100% !important; max-width: 720px !important; margin: 0 auto !important; font-size: 12.5px !important; padding: 22px !important; border: 1px solid #000 !important; page-break-inside: avoid !important; }
+  .tpl-classic { border: 2px solid #075c43 !important; padding: 22px !important; font-family: serif !important; }
+  .tpl-rehab { border: 1px solid #cbd5e1 !important; border-top: 8px solid #075c43 !important; padding: 22px !important; border-radius: 12px !important; }
+  .tpl-ayush { border: 4px double #854d0e !important; padding: 20px !important; background: #fffdf5 !important; font-family: 'Noto Sans Devanagari', serif !important; }
+  .tpl-thermal { width: 72mm !important; max-width: 72mm !important; font-family: monospace !important; font-size: 11px !important; padding: 6px !important; }
+  .tpl-minimal { padding: 24px !important; font-family: sans-serif !important; border: none !important; }
+  tr { page-break-inside: avoid !important; }
+}
+</style>
+</head>
+<body oncontextmenu="return false;">
+
+<!-- स्प्लैश स्क्रीन -->
+<div id="splashScreen" style="position:fixed;inset:0;background:linear-gradient(135deg,#075c43,#043f2e);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease, visibility 0.6s ease;">
+  <div style="text-align:center;">
+    <img src="logo.png" style="width:110px;height:110px;border-radius:28px;border:3px solid #38bdf8;box-shadow:0 12px 35px rgba(0,0,0,0.45);animation:splashPulse 1.8s ease-in-out infinite;" alt="Logo">
+    <h1 style="color:#fff;font-size:22px;font-weight:900;margin-top:16px;letter-spacing:-0.5px;">चुपाकाबरा खाता</h1>
+    <p style="color:#a7f3d0;font-size:12px;margin-top:4px;font-weight:700;">प्रीमियम डिजिटल गद्दी • भारत का बहीखाता</p>
+  </div>
+</div>
+
+<div class="app-wrapper" id="appMainWrapper">
+  <!-- हेडर -->
+  <header class="app-top">
+    <button type="button" class="iconbtn" onclick="openProfileDrawer()" title="प्रोफाइल व सेटिंग्स">👤</button>
+    <div class="header-brand-center" onclick="speakMunshiHonorific()">
+      <img src="logo.png" class="header-logo-mini" alt="Logo">
+      <div class="brand-text">
+        <span id="shopTitleHeader">मेरी दुकान का खाता</span>
+        <small id="livePanchangHeader">लोड हो रहा है...</small>
+      </div>
+    </div>
+    <div class="vault-badge" title="गद्दी की बरकत बचत" onclick="openGameModal()">
+      <span>🪙</span>
+      <span id="vaultBalanceHeader">0.00</span>
+    </div>
+  </header>
+
+  <!-- 1. मुख्य गद्दी होम स्क्रीन -->
+  <div class="viewport" id="homeMainView">
+    <div class="orb-card">
+      <div class="node-btn n-grahak" onclick="openCustomerManagerScreen()">
+        <span>👥</span>ग्राहक खाता<small>उधार / जमा</small>
+      </div>
+      <div class="node-btn n-bill" onclick="showBillingDesk()">
+        <span>🛒</span>बिल काउंटर<small>कच्चा / GST</small>
+      </div>
+      <div class="node-btn n-bank" onclick="openBankingHub()">
+        <span>🏛️</span>बैंकिंग<small>चालू खाता 🔐</small>
+      </div>
+      <div class="orb-core-dragon" onclick="openGameModal()">
+        <img src="logo.png" alt="Chupakabra Mascot" id="orbCoreImg">
+      </div>
+    </div>
+
+    <!-- गद्दी बैलेंस स्ट्रिप -->
+    <div class="balance-strip">
+      <div class="b-box">
+        <small>लेना है (बाज़ार में बाकी)</small>
+        <strong id="dispTotalGet" style="color:var(--red);">₹0</strong>
+      </div>
+      <div class="b-divider"></div>
+      <div class="b-box">
+        <small>देना है (जमा / आवक)</small>
+        <strong id="dispTotalGive" style="color:var(--green);">₹0</strong>
+      </div>
+    </div>
+
+    <!-- आज का कारोबार लाइव समरी कार्ड -->
+    <div id="premiumBusinessSummaryContainer"></div>
+  </div>
+  <!-- 2. '👥 ग्राहक खाता' का नया संपूर्ण डेडिकेटेड पेज -->
+  <div class="viewport" id="customerManagerView" style="display:none;">
+    <button type="button" class="btn-cancel" style="height:38px;padding:0 14px;margin-bottom:12px;font-size:12px;display:flex;align-items:center;gap:6px;" onclick="closeCustomerManagerScreen()">
+      ← वापस गद्दी पर जाएँ
+    </button>
+
+    <!-- ग्राहक / व्यापारी भाई पार्टी स्विचर टैब -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#e2e8f0;padding:4px;border-radius:14px;margin-bottom:12px;">
+      <button type="button" id="tabPartyCust" onclick="switchPartyMode('customer')" style="border:0;background:var(--primary);color:#fff;padding:8px;border-radius:10px;font-size:12px;font-weight:800;transition:.2s;">
+        👤 ग्राहक
+      </button>
+      <button type="button" id="tabPartySupp" onclick="switchPartyMode('supplier')" style="border:0;background:transparent;color:#475569;padding:8px;border-radius:10px;font-size:12px;font-weight:800;transition:.2s;">
+        🤝 व्यापारी भाई
+      </button>
+    </div>
+
+    <!-- वीडियो जैसा साफ़ खाता खोलने का फॉर्म (कार्ड) -->
+    <div style="background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow-card);">
+      <div style="font-size:13px;font-weight:900;color:var(--primary);margin-bottom:10px;" id="dedicatedFormHeading">
+        ＋ नया ग्राहक खाता जोड़ें
+      </div>
+      
+      <!-- कौन है? रेडियो टॉगल -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;padding:4px 2px;font-size:12px;font-weight:700;">
+        <span style="color:var(--muted);">कौन हैं?</span>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+          <input type="radio" name="dedPartyType" value="customer" id="dedRadioCust" checked onchange="syncPartyRadio('customer')"> ग्राहक
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+          <input type="radio" name="dedPartyType" value="supplier" id="dedRadioSupp" onchange="syncPartyRadio('supplier')"> सप्लायर (व्यापारी भाई)
+        </label>
+      </div>
+
+      <!-- पार्टी नाम (वीडियो स्टाइल इनलाइन वैलिडेशन एरर सहित) -->
+      <div style="margin-bottom:10px;">
+        <input id="dedName" class="d-input" placeholder="पार्टी नाम *" oninput="clearInlineError('dedName', 'dedNameErr')">
+        <div id="dedNameErr" class="error-text">नाम आवश्यक है</div>
+      </div>
+
+      <!-- मोबाइल नंबर (+91 प्रीफ़िक्स बॉक्स के साथ) -->
+      <div style="margin-bottom:10px;">
+        <div class="phone-prefix-wrap" id="dedPhoneWrap">
+          <div class="phone-prefix-box">
+            <span>🇮🇳</span>
+            <span>+91</span>
+          </div>
+          <input id="dedPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="मोबाइल नंबर *" oninput="clearInlineError('dedPhoneWrap', 'dedPhoneErr')">
+        </div>
+        <div id="dedPhoneErr" class="error-text">मान्य 10 अंकों का मोबाइल नंबर आवश्यक है</div>
+      </div>
+
+      <!-- पता / लैंडमार्क -->
+      <input id="dedAddress" class="d-input" style="margin-bottom:12px;" placeholder="पता / गाँव / लैंडमार्क (वैकल्पिक)">
+      
+      <!-- डायनामिक सबमिट बटन (ग्राहक = नीला #1e5bb8, सप्लायर = गहरा हरा #107c41) -->
+      <button type="button" id="dedPartySubmitBtn" class="btn-save" style="width:100%;height:44px;background:#1e5bb8;font-size:14px;" onclick="saveDedicatedCustomer()">
+        ग्राहक जोड़ें ✓
+      </button>
+    </div>
+
+    <!-- खोज बार -->
+    <input id="ledgerSearchInput" class="search" placeholder="🔎 नाम या मोबाइल से खोजें..." oninput="renderCustomerList()">
+
+    <!-- खातों की वास्तविक सूची -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 2px 8px;">
+      <b style="font-size:13px;color:var(--text);" id="partyListLabel">ग्राहक खाता सूची</b>
+      <span style="font-size:10px;color:var(--muted);font-weight:700;" id="countDrawerSubtitle">0 खाते दर्ज</span>
+    </div>
+    <div id="customersListContainer" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;"></div>
+
+    <!-- गद्दी रोज़नामचा कार्ड (दुकान व घरेलू खर्च) -->
+    <div class="ledger-trigger-card" style="border-color:#fed7aa;background:linear-gradient(to right,#fff,#fffbeb);" onclick="toggleExpenseDrawer()">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:#fef3c7;color:#b45309;display:grid;place-items:center;font-size:18px;">🪙</div>
+        <div>
+          <b style="font-size:13px;color:var(--text);">गद्दी रोज़नामचा (दुकान व घरेलू खर्च)</b>
+          <small style="font-size:10px;color:var(--muted);display:block;margin-top:2px;" id="expThisMonthSummary">इस महीने कुल: ₹0</small>
+        </div>
+      </div>
+      <button type="button" id="expenseToggleBtn" style="border:0;background:#b45309;color:#fff;padding:6px 12px;border-radius:10px;font-size:11px;font-weight:800;">
+        खर्च खोलें 📂
+      </button>
+    </div>
+
+    <!-- फोल्डेबल खर्च ड्रावर -->
+    <div class="ledger-drawer" id="expenseDrawer" style="display:none;">
+      <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:var(--shadow-card);">
+        <div style="font-size:11.5px;font-weight:800;margin-bottom:8px;color:#b45309;" id="expFormTitle">＋ नया खर्च दर्ज करें (तेल, दूध, किराया आदि)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+          <input id="expAmount" type="number" inputmode="decimal" class="d-input" style="height:38px;font-size:12px;" placeholder="रकम ₹">
+          <select id="expCategory" class="d-input" style="height:38px;font-size:11px;background:#fff;font-weight:700;">
+            <option value="दूध व किराना">🥛 दूध व किराना</option>
+            <option value="दुकान खर्च">🏪 दुकान खर्च / भाड़ा</option>
+            <option value="चाय-पानी">☕ चाय-नाश्ता</option>
+            <option value="किराया व बिजली">💡 किराया व बिजली</option>
+            <option value="घरेलू खर्च">🏠 घरेलू खर्च</option>
+            <option value="अन्य">📦 अन्य खर्च</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:6px;margin-bottom:6px;">
+          <input id="expNote" class="d-input" style="height:38px;font-size:12px;" placeholder="विवरण (उदा. 2L तेल)">
+          <input id="expDate" type="date" class="d-input" style="height:38px;font-size:11px;background:#fff;">
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button type="button" id="expSubmitBtn" onclick="saveNewExpense()" style="flex:1;height:38px;border:0;background:#b45309;color:#fff;border-radius:10px;font-weight:800;font-size:12px;">
+            खर्च सुरक्षित करें ✓
+          </button>
+          <button type="button" id="expCancelEditBtn" onclick="cancelExpenseEdit()" style="display:none;height:38px;border:0;background:#e2e8f0;color:#334155;border-radius:10px;padding:0 12px;font-weight:800;font-size:11px;">
+            रद्द
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 2px 8px;">
+        <span style="font-size:11.5px;font-weight:800;">हालिया खर्च ब्योरा:</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button type="button" onclick="printExpenseSlip()" style="border:0;background:#fef3c7;color:#b45309;padding:3px 7px;border-radius:6px;font-size:10px;font-weight:800;">🖨️ पर्ची</button>
+          <button type="button" onclick="shareExpenseWhatsApp()" style="border:0;background:#ecfdf5;color:#059669;padding:3px 7px;border-radius:6px;font-size:10px;font-weight:800;">📲 WhatsApp</button>
+        </div>
+      </div>
+      <div id="expenseListContainer" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- 3. ग्राहक/सप्लायर डिटेल प्रोफाइल स्क्रीन (व्हाइट-स्क्रीन बग मुक्त) -->
+  <div class="viewport" id="detailView" style="display:none;padding-bottom:90px;">
+    <button type="button" class="btn-cancel" style="height:36px;padding:0 12px;margin-bottom:12px;font-size:12px;display:flex;align-items:center;gap:6px;" onclick="backToMainSlide()">
+      ← वापस बहीखाते में
+    </button>
+    
+    <div style="background:#fff;border-radius:24px;padding:18px;text-align:center;box-shadow:var(--shadow-card);border:1px solid var(--line);">
+      <div class="avatar" id="dAvatar" style="width:56px;height:56px;margin:auto;font-size:22px;border-radius:18px;">?</div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:8px;">
+        <h2 id="dName" style="font-size:18px;font-weight:900;">-</h2>
+        <span id="dPartyTag" style="font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:6px;background:#e0f2fe;color:#0284c7;">ग्राहक</span>
+      </div>
+      <div class="phone" id="dPhone" style="font-size:12px;margin-top:3px;">-</div>
+      <div id="dAddress" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
+      <div id="dDueDateBadge" style="display:none;margin-top:6px;font-size:10.5px;font-weight:800;background:#fff1f2;color:var(--red);padding:3px 10px;border-radius:10px;border:1px solid #fecdd3;"></div>
+      
+      <!-- मुख्य बैलेंस डिस्प्ले -->
+      <div style="font-size:28px;font-weight:900;margin-top:10px;" id="dAmount">₹0</div>
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-top:2px;" id="dStatus">-</div>
+      
+      <button type="button" class="btn-save" style="background:#ecfdf5;color:var(--primary);width:100%;margin-top:10px;height:42px;font-size:12px;" onclick="whatsappReminder()">
+        💬 WhatsApp भुगतान रिमाइंडर
+      </button>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;">
+        <button type="button" class="btn-cancel" style="height:38px;font-size:11px;padding:0;" onclick="openQR()">▣ UPI QR</button>
+        <button type="button" class="btn-cancel" style="height:38px;font-size:11px;padding:0;" onclick="printLedgerSlip()">🖨 पर्ची</button>
+        <button type="button" class="btn-cancel" style="height:38px;font-size:11px;padding:0;" onclick="editCustomer()">✏️ सुधारें</button>
+      </div>
+    </div>
+
+    <!-- लेन-देन का इतिहास सूची -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 4px 8px;">
+      <b style="font-size:13px;">लेन-देन का इतिहास:</b>
+      <small style="color:var(--muted);font-size:10px;">✏️ सुधारें / × हटाएं</small>
+    </div>
+    <div id="transactionsDetailList" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+    <!-- वीडियो जैसा फिक्स्ड बॉटम एक्शन बार (आपने दिए ₹ / आपको मिले ₹) -->
+    <div class="ledger-fixed-bottom-bar" id="ledgerBottomBar">
+      <button type="button" class="btn-ledger-give" onclick="openTx('give')">
+        <span>-</span> आपने दिए ₹
+      </button>
+      <button type="button" class="btn-ledger-get" onclick="openTx('get')">
+        <span>+</span> आपको मिले ₹
+      </button>
+    </div>
+  </div>
+  <!-- 4. सेवाएँ हब स्क्रीन (केवल फ़ूटर के "सेवाएँ" बटन से खुलेगी) -->
+  <div class="viewport" id="servicesMainView" style="display:none;">
+    <div style="background:linear-gradient(135deg,var(--primary),#097d58);color:#fff;border-radius:24px;padding:18px;box-shadow:0 12px 28px rgba(7,92,67,0.22);margin-bottom:14px;">
+      <h3 style="font-size:16.5px;font-weight:900;margin-bottom:4px;">🛡️ व्यावसायिक व क्लिनिकल टूल्स</h3>
+      <p style="font-size:11px;color:#d8eee5;">फिजियोथेरेपिस्ट, मेडिकल स्टोर, दुकानदार व आम नागरिक सेवाएँ</p>
+    </div>
+
+    <!-- 4 मुख्य कार्ड्स -->
+    <div class="quickgrid" style="margin-top:0;">
+      <div class="action-card" onclick="showClinicDesk()">
+        <div class="badge-ico">🩺</div>
+        <b>Clinical Desk</b>
+        <small>5 स्टैंडर्ड शैलियाँ • ℞ प्रिंट व WhatsApp</small>
+      </div>
+      <div class="action-card" onclick="showPharmacyDesk()">
+        <div class="badge-ico">💊</div>
+        <b>फार्मेसी काउंटर</b>
+        <small>दवा पर्चा, बैच, एक्सपायरी व मैप लिंक</small>
+      </div>
+      <div class="action-card" onclick="showBillingDesk()">
+        <div class="badge-ico">🛒</div>
+        <b>काउंटर बिलिंग</b>
+        <small>GST स्लैब व ब्लूटूथ थर्मल प्रिंट</small>
+      </div>
+      <div class="action-card" onclick="openTurtlemintInsurance()">
+        <div class="badge-ico">🛡</div>
+        <b>दुकान व स्वास्थ्य बीमा</b>
+        <small>प्रमाणित Turtlemint PoSP पार्टनर</small>
+      </div>
+    </div>
+
+    <!-- 12 आवश्यक सरकारी पोर्टल -->
+    <div class="ledger-trigger-card" style="margin-top:14px;background:#0f172a;color:#fff;border-color:#1e293b;" onclick="toggleGovDrawer()">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-size:24px;">🏛️</div>
+        <div>
+          <b style="font-size:13.5px;color:#fff;">12 आवश्यक सरकारी पोर्टल</b>
+          <small style="font-size:9.5px;color:#94a3b8;display:block;margin-top:2px;">आयुष्मान, भूलेख, राशन, PM-किसान, eCourts आदि</small>
+        </div>
+      </div>
+      <button type="button" id="govToggleBtn" style="border:0;background:rgba(255,255,255,0.15);color:#fde047;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;">
+        सेवाएँ खोलें ↗
+      </button>
+    </div>
+
+    <div class="ledger-drawer" id="govDrawer" style="display:none;margin-top:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">💳</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">कैशलेस कार्ड</div>
+          <a href="https://cmtcts.upsdc.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🏥</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">आयुष्मान कार्ड</div>
+          <a href="https://beneficiary.nha.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🌾</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">राशन कार्ड पर्ची</div>
+          <a href="https://fcs.up.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🎋</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">गन्ना पर्ची</div>
+          <a href="https://enquiry.caneup.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🏫</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">मानव संपदा</div>
+          <a href="https://ehrms.upsdc.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">⚖️</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">eCourts कोर्ट केस</div>
+          <a href="https://services.ecourts.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🔍</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">प्रमाणपत्र सत्यापन</div>
+          <a href="https://edistrict.up.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">📜</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">भूलेख खतौनी</div>
+          <a href="https://upbhulekh.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🚜</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">PM-किसान</div>
+          <a href="https://pmkisan.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🚆</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">रेलवे PNR स्टेटस</div>
+          <a href="https://www.indianrail.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🏛</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">बैनामा व रजिस्ट्री</div>
+          <a href="https://igrsup.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;">
+          <div style="font-size:20px;">🛡️</div>
+          <div style="font-size:11px;font-weight:800;color:var(--text);margin:2px 0;">फसल बीमा क्लेम</div>
+          <a href="https://pmfby.gov.in" target="_blank" rel="noopener" style="font-size:10px;color:#0284c7;font-weight:800;text-decoration:none;">पोर्टल ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- बॉटम नेविगेशन बार -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="bHome" onclick="switchMainTab('home')"><div>⌂</div>गद्दी होम</div>
+    <div class="nav-item" id="bServices" onclick="switchMainTab('services')"><div>🛡️</div>सेवाएँ हब</div>
+  </nav>
+
+  <!-- मैस्कॉट -->
+  <div class="mascot-wrap">
+    <div class="mascot-bubble" id="mascotBubble">नमस्ते लाला जी! 🙏</div>
+    <div class="mascot-container" onclick="openGameModal()">
+      <img src="logo.png" id="chupaImg" class="chupa-avatar" alt="चुपाकाबरा ड्रैगन">
+      <div class="mascot-mute" id="mascotMuteBtn" onclick="toggleMascotMute(event)">🔊</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastMsg"></div>
+</div>
+
+<!-- ================= 5. CLINICAL 5 STANDARD Rx DESK ================= -->
+<section class="clinic-desk" id="clinicDesk" style="display:none;padding:12px 14px;max-width:480px;margin:auto;">
+  <button type="button" class="btn-cancel" style="height:36px;padding:0 12px;margin-bottom:12px;font-size:12px;" onclick="closeAllDesks()">← वापस सेवाओं में</button>
+  <div style="background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow-card);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div>
+        <h2 style="font-size:15px;font-weight:900;color:var(--text);" id="dispClinicName">आरोग्य रिहैब व थेरेपी क्लिनिक</h2>
+        <p style="font-size:10.5px;color:var(--muted);margin-top:2px;" id="dispClinicSub">डॉ. आर. पी. सिंह | Reg: UP-RMP-2026/A</p>
+      </div>
+      <button type="button" class="btn-cancel" style="height:32px;padding:0 10px;font-size:11px;font-weight:800;" onclick="editClinicSetup()">⚙ सेटअप</button>
+    </div>
+
+    <!-- 5 पर्चा शैलियाँ -->
+    <div style="background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:11px;font-weight:800;color:var(--text);">📄 पर्चा शैली (5 स्टैंडर्ड विकल्प)</span>
+        <span style="font-size:9.5px;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 7px;border-radius:6px;" id="rxCategoryBadge">1. सादा / क्लासिक फॉर्मल</span>
+      </div>
+      <select id="rxTemplatePicker" class="d-input" style="height:38px;font-size:11.5px;font-weight:700;" onchange="updateRxCategoryBadge()">
+        <option value="1" selected>1. सादा / क्लासिक फॉर्मल (AIIMS Style क्लीन हेडर व बॉर्डर)</option>
+        <option value="2">2. मॉडर्न फिजियो व न्यूरो (VAS पेन स्केल ग्रिड व 2-कॉलम असेसमेंट)</option>
+        <option value="3">3. पारंपरिक आयुष व नाड़ी (त्रिदोष डायरी व हर्बल अनुपान बॉर्डर)</option>
+        <option value="4">4. थर्मल रोल पर्चा (58mm/80mm ओपीडी टोकन व काउंटर स्लिप)</option>
+        <option value="5">5. एग्जीक्यूटिव मिनिमल (मॉडर्न लेटरहेड व बुलेटेड समरी)</option>
+      </select>
+    </div>
+
+    <!-- SPECIALTY TABS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;">
+      <div class="btn-cancel rx-mode-tab active" data-rxm="therapy" onclick="setRxCategory('therapy')" style="text-align:center;height:36px;line-height:36px;padding:0;font-size:11px;font-weight:800;background:var(--primary);color:#fff;border-radius:10px;">फिजियो/न्यूरो</div>
+      <div class="btn-cancel rx-mode-tab" data-rxm="medical" onclick="setRxCategory('medical')" style="text-align:center;height:36px;line-height:36px;padding:0;font-size:11px;font-weight:800;border-radius:10px;">एलोपैथ दवा</div>
+      <div class="btn-cancel rx-mode-tab" data-rxm="rural" onclick="setRxCategory('rural')" style="text-align:center;height:36px;line-height:36px;padding:0;font-size:11px;font-weight:800;border-radius:10px;">प्राथमिक सेवा</div>
+    </div>
+
+    <!-- PATIENT ENTRY -->
+    <div style="display:grid;grid-template-columns:1.4fr 0.8fr 1fr;gap:6px;margin-bottom:10px;">
+      <input id="rxPtName" class="d-input" style="height:38px;font-size:11.5px;" placeholder="मरीज़ का नाम *">
+      <input id="rxPtAgeGender" class="d-input" style="height:38px;font-size:11.5px;" placeholder="42 / M">
+      <input id="rxPtPhone" type="tel" maxlength="10" class="d-input" style="height:38px;font-size:11.5px;" placeholder="WhatsApp नंबर">
+    </div>
+
+    <!-- COMPLAINTS -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;">
+      <span style="font-size:11px;font-weight:800;">लक्षण व तकलीफ़ (Complaints):</span>
+      <button type="button" class="btn-cancel" style="height:26px;padding:0 8px;font-size:10px;color:#0284c7;font-weight:800;" onclick="openRxItemAdder('c')">＋ नया जोड़ें</button>
+    </div>
+    <div id="rxComplaintsCloud" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+
+    <!-- TREATMENT -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;">
+      <span style="font-size:11px;font-weight:800;" id="rxTreatLbl">थेरेपी व दवा (Treatment):</span>
+      <button type="button" class="btn-cancel" style="height:26px;padding:0 8px;font-size:10px;color:#0284c7;font-weight:800;" onclick="openRxItemAdder('t')">＋ नया जोड़ें</button>
+    </div>
+    <div id="rxTreatmentCloud" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+
+    <!-- ADVICE -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;">
+      <span style="font-size:11px;font-weight:800;">परहेज व कसरत (Advice):</span>
+      <button type="button" class="btn-cancel" style="height:26px;padding:0 8px;font-size:10px;color:#0284c7;font-weight:800;" onclick="openRxItemAdder('a')">＋ नया जोड़ें</button>
+    </div>
+    <div id="rxAdviceCloud" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+
+    <input id="rxPtNext" class="d-input" style="height:38px;margin-top:6px;font-size:11.5px;" placeholder="अगला परामर्श (उदा. 3 दिन बाद)">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+      <button type="button" class="btn-save" style="height:44px;font-size:12px;" onclick="printClinicPrescription()">🖨️ पर्चा प्रिंट</button>
+      <button type="button" class="btn-save" style="height:44px;font-size:12px;background:#ecfdf5;color:var(--primary);" onclick="sendClinicWhatsAppRx()">📲 WhatsApp + मैप</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 6. PHARMACY COUNTER DESK ================= -->
+<section class="pharmacy-desk" id="pharmacyDesk" style="display:none;padding:12px 14px;max-width:480px;margin:auto;">
+  <button type="button" class="btn-cancel" style="height:36px;padding:0 12px;margin-bottom:12px;font-size:12px;" onclick="closeAllDesks()">← वापस सेवाओं में</button>
+  <div style="background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow-card);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div>
+        <h2 style="font-size:15px;font-weight:900;color:var(--text);" id="dispPharmaName">आरोग्य मेडिकल व फार्मेसी</h2>
+        <p style="font-size:10.5px;color:var(--muted);margin-top:2px;" id="dispPharmaSub">डी.एल. सं.: UP-DL-8942 | 📍 मैप लिंक सक्रिय</p>
+      </div>
+      <button type="button" class="btn-cancel" style="height:32px;padding:0 10px;font-size:11px;font-weight:800;" onclick="editPharmaSetup()">⚙ सेटअप</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+      <input id="phCustName" class="d-input" style="height:38px;font-size:11.5px;" placeholder="मरीज़ का नाम (उदा. नकद)">
+      <input id="phCustPhone" type="tel" maxlength="10" class="d-input" style="height:38px;font-size:11.5px;" placeholder="WhatsApp नंबर">
+    </div>
+    <input id="phDocRef" class="d-input" style="height:38px;margin-bottom:8px;font-size:11.5px;" placeholder="रेफरिंग डॉक्टर का नाम">
+
+    <table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:6px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--line);color:var(--muted);">
+          <th style="width:38%;text-align:left;padding:4px 2px;">दवा नाम</th>
+          <th style="width:22%;text-align:left;padding:4px 2px;">बैच/एक्स</th>
+          <th style="width:16%;text-align:center;padding:4px 2px;">मात्रा</th>
+          <th style="width:24%;text-align:right;padding:4px 2px;">एमआरपी (₹)</th>
+        </tr>
+      </thead>
+      <tbody id="pharmaTableBody"></tbody>
+    </table>
+
+    <button type="button" onclick="addPharmaRow()" style="border:0;background:#f0f9ff;color:#0284c7;font-size:11px;font-weight:800;padding:7px;border-radius:10px;margin-top:8px;width:100%;">
+      ＋ नई दवा जोड़ें
+    </button>
+
+    <div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span style="color:var(--muted);">उप-योग:</span>
+        <strong id="phSubTotal">₹0.00</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="color:var(--muted);">छूट / डिस्काउंट:</span>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span>₹</span>
+          <input type="number" id="phDiscount" value="0" oninput="recalcPharma()" style="width:65px;height:28px;border:1px solid var(--line);border-radius:6px;text-align:right;padding:2px 4px;font-size:11px;">
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;border-top:1px solid var(--line);padding-top:4px;margin-top:4px;">
+        <span>कुल देय राशि:</span>
+        <strong id="phGrandTotal" style="color:#0284c7;">₹0.00</strong>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+      <button type="button" class="btn-save" style="height:44px;font-size:12px;background:#0f172a;" onclick="printPharmaInvoice()">🖨️ पर्चा प्रिंट</button>
+      <button type="button" class="btn-save" style="height:44px;font-size:12px;background:#ecfdf5;color:var(--primary);" onclick="sendPharmaWhatsApp()">📲 WhatsApp बिल + मैप</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 7. COUNTER BILLING DESK ================= -->
+<section class="billing" id="billingDesk" style="display:none;padding:12px 14px;max-width:480px;margin:auto;">
+  <button type="button" class="btn-cancel" style="height:36px;padding:0 12px;margin-bottom:12px;font-size:12px;" onclick="closeAllDesks()">← वापस सेवाओं में</button>
+  <div style="background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow-card);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div>
+        <h2 style="font-size:15px;font-weight:900;margin:0;">काउंटर बिलिंग डेस्क</h2>
+        <p style="font-size:10px;color:var(--muted);margin:2px 0 0;">कच्चा पर्चा एवं कानूनी GST इनवॉइस</p>
+      </div>
+      <div style="display:flex;gap:4px;background:#f1f5f9;padding:3px;border-radius:10px;">
+        <button type="button" id="bTypeKaccha" class="btn-cancel" style="height:28px;padding:0 8px;font-size:10.5px;font-weight:800;background:var(--primary);color:#fff;border-radius:8px;" onclick="switchBillMode('kaccha')">कच्चा पर्चा</button>
+        <button type="button" id="bTypeGst" class="btn-cancel" style="height:28px;padding:0 8px;font-size:10.5px;font-weight:800;border-radius:8px;" onclick="switchBillMode('gst')">पक्का GST</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+      <input id="cartCustName" class="d-input" style="height:36px;font-size:11px;" placeholder="ग्राहक नाम (उदा. नकद)">
+      <input id="cartCustPhone" type="tel" maxlength="10" class="d-input" style="height:36px;font-size:11px;" placeholder="मोबाइल नंबर (वैकल्पिक)">
+    </div>
+
+    <!-- ब्लूटूथ प्रिंटर बार -->
+    <div style="background:#0f172a;color:#fff;border-radius:12px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;">🔫 बारकोड स्कैनर सक्रिय</div>
+        <div style="color:#38bdf8;font-size:8.5px;">सामान स्कैन करें या नीचे जोड़ें</div>
+      </div>
+      <button type="button" onclick="connectBluetoothThermal()" style="border:0;background:var(--green);color:#fff;padding:5px 8px;border-radius:6px;font-weight:800;font-size:9.5px;">
+        🖨 ब्लूटूथ प्रिंटर
+      </button>
+    </div>
+
+    <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:11px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--line);color:var(--muted);">
+          <th style="width:34%;text-align:left;padding:4px 2px;">सामान</th>
+          <th style="width:14%;text-align:center;padding:4px 2px;">मात्रा</th>
+          <th style="width:16%;text-align:center;padding:4px 2px;">इकाई</th>
+          <th style="width:20%;text-align:right;padding:4px 2px;">भाव (₹)</th>
+          <th style="width:16%;text-align:center;padding:4px 2px;" class="gst-col">GST</th>
+        </tr>
+      </thead>
+      <tbody id="cartTableBody"></tbody>
+    </table>
+
+    <button type="button" onclick="addCartRow()" style="border:0;background:#f1f5f9;color:#0284c7;font-size:11px;font-weight:800;padding:6px;border-radius:8px;margin-top:6px;width:100%;">
+      ＋ नया सामान जोड़ें
+    </button>
+
+    <div style="margin-top:8px;font-size:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+        <span style="color:var(--muted);">उप-योग:</span>
+        <strong id="cSubtotal">₹0.00</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+        <span style="color:var(--muted);">छूट / डिस्काउंट:</span>
+        <div style="display:flex;align-items:center;gap:3px;">
+          <span>₹</span>
+          <input type="number" id="cDiscount" value="0" oninput="recalcCart()" style="width:60px;height:26px;border:1px solid var(--line);border-radius:6px;text-align:right;padding:2px 4px;font-size:11px;">
+        </div>
+      </div>
+      <div id="cTaxRow" style="display:none;font-size:11px;color:#0284c7;justify-content:space-between;margin-top:2px;">
+        <span>कुल GST कर:</span>
+        <strong id="cTaxVal">₹0.00</strong>
+      </div>
+      <div style="border-top:1px solid var(--line);padding-top:4px;margin-top:4px;font-size:14px;font-weight:900;display:flex;justify-content:space-between;">
+        <span>कुल देय राशि:</span>
+        <strong id="cGrandTotal" style="color:var(--primary);">₹0.00</strong>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:6px;align-items:center;margin-top:8px;background:#f8fafc;padding:5px 8px;border-radius:8px;border:1px solid var(--line);">
+      <label style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap;">प्रिंट साइज़:</label>
+      <select id="printPaperSize" class="d-input" style="height:28px;font-size:10.5px;padding:2px 6px;">
+        <option value="roll" selected>पतला रोल पर्चा (58mm / 80mm)</option>
+        <option value="a4">पूरा पन्ना (A4 साइज़)</option>
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+      <button type="button" class="btn-save" style="height:42px;font-size:11.5px;background:var(--primary);" onclick="printDirectCartBluetooth()">⚡ डायरेक्ट ब्लूटूथ प्रिंट</button>
+      <button type="button" class="btn-save" style="height:42px;font-size:11.5px;background:#ecfdf5;color:var(--primary);" onclick="sendCartWhatsApp()">📲 WhatsApp बिल</button>
+    </div>
+    <button type="button" class="btn-cancel" style="width:100%;margin-top:8px;height:38px;font-weight:800;font-size:11px;" onclick="printCartInvoice()">
+      🖨️ सामान्य प्रिंट प्रीव्यू (PDF / A4 / रोल)
+    </button>
+  </div>
+</section>
+
+<!-- ================= MODALS & PROFILE (FIREBASE LOGIN INCLUDED) ================= -->
+
+<!-- लेन-देन (उधार/जमा) मोडल -->
+<div class="modal" id="txModal"><div class="box">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <h2 id="txTitle" style="font-size:16px;font-weight:900;color:var(--primary);margin:0;">माल दिया (उधार) दर्ज करें</h2>
+    <button type="button" class="btn-cancel" style="width:28px;height:28px;border-radius:50%;padding:0;" onclick="closeModal('txModal')">✕</button>
+  </div>
+  <div style="margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:800;color:var(--muted);display:block;margin-bottom:3px;">कुल राशि (₹) *</label>
+    <input id="txAmount" class="d-input" type="number" inputmode="decimal" placeholder="₹0.00">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:800;color:var(--muted);display:block;margin-bottom:3px;">सामान का नाम / नोट (माल विवरण) *</label>
+    <input id="txNote" class="d-input" placeholder="उदा. सरसों तेल 2L, आटा 5kg">
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+    <div>
+      <label style="font-size:10.5px;color:var(--muted);font-weight:700;">दिनांक</label>
+      <input id="txDate" type="date" class="d-input" style="height:38px;font-size:11px;background:#fff;">
+    </div>
+    <div>
+      <label style="font-size:10.5px;color:var(--muted);font-weight:700;">समय</label>
+      <input id="txTime" type="time" class="d-input" style="height:38px;font-size:11px;background:#fff;">
+    </div>
+  </div>
+  <div id="txDueDateBox" style="margin-bottom:9px;">
+    <label style="font-size:10.5px;color:var(--red);font-weight:800;display:block;margin-bottom:3px;">📅 वसूली की तारीख (पैसा लौटने का दिन):</label>
+    <input id="txDueDate" class="d-input" type="date" style="height:38px;">
+  </div>
+  <div class="modalrow">
+    <button type="button" class="btn-cancel" onclick="closeModal('txModal')">रद्द करें</button>
+    <button type="button" class="btn-save" id="txSaveBtn" onclick="saveTx()">हिसाब सेव करें ✓</button>
+  </div>
+</div></div>
+
+<!-- सेटिंग्स व प्रोफाइल मोडल (फायरबेस ईमेल ऑथेंटिकेशन व सिंक ब्लॉक सहित) -->
+<div class="modal" id="settingsModal"><div class="box">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <h2 style="font-size:16px;font-weight:900;color:var(--primary);margin:0;">👤 प्रोफाइल व गद्दी सेटिंग्स</h2>
+    <button type="button" class="btn-cancel" style="width:28px;height:28px;border-radius:50%;padding:0;" onclick="closeModal('settingsModal')">✕</button>
+  </div>
+
+  <!-- क्लाउड बैकअप व फायरबेस लॉगिन ब्लॉक -->
+  <div style="background:#f1f5f9;border:1px solid #cbd5e1;border-radius:16px;padding:12px;margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <b style="font-size:12px;color:var(--text);">☁️ क्लाउड बैकअप (Firebase)</b>
+      <span id="firebaseStatusBadge" style="font-size:9.5px;font-weight:800;background:#fee2e2;color:#ef4444;padding:2px 8px;border-radius:8px;">🔴 ऑफ़लाइन</span>
+    </div>
+    
+    <!-- जब यूज़र लॉग-आउट हो -->
+    <div id="firebaseLoggedOutBox">
+      <p style="font-size:10.5px;color:var(--muted);margin-bottom:8px;">अपने ईमेल से लॉगिन करें ताकि हर एंट्री सीधे क्लाउड में सुरक्षित हो सके।</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+        <input id="fbAuthEmail" type="email" class="d-input" style="height:36px;font-size:11.5px;" placeholder="ईमेल आईडी">
+        <input id="fbAuthPass" type="password" class="d-input" style="height:36px;font-size:11.5px;" placeholder="पासवर्ड (6+ अक्षर)">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <button type="button" class="btn-save" style="height:36px;font-size:11.5px;" onclick="handleFirebaseLogin()">लॉगिन करें 🔐</button>
+        <button type="button" class="btn-cancel" style="height:36px;font-size:11.5px;font-weight:800;" onclick="handleFirebaseSignup()">नया खाता बनाएं ＋</button>
+      </div>
+    </div>
+
+    <!-- जब यूज़र लॉगिन हो -->
+    <div id="firebaseLoggedInBox" style="display:none;">
+      <div style="font-size:11px;color:var(--text);margin-bottom:6px;">
+        लॉगिन ईमेल: <b id="loggedInUserEmail">-</b>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <button type="button" class="btn-save" style="height:36px;font-size:11px;background:#059669;" onclick="manualCloudSync()">☁️ अभी सिंक करें</button>
+        <button type="button" class="btn-cancel" style="height:36px;font-size:11px;color:#e11d48;font-weight:800;" onclick="handleFirebaseLogout()">लॉगआउट 🚪</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:8px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">दुकानदार का नाम</label><input id="profMerchantName" class="d-input" placeholder="उदा. सत्यप्रकाश सिंह"></div>
+  <div style="margin-bottom:8px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">दुकान का नाम</label><input id="profShopName" class="d-input" placeholder="मेरी दुकान का खाता"></div>
+  <div style="margin-bottom:8px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">पता व लैंडमार्क</label><input id="profAddress" class="d-input" placeholder="उदा. मेन बाज़ार, उत्तर प्रदेश"></div>
+  <div style="margin-bottom:8px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">दुकान संपर्क फ़ोन</label><input id="profPhone" class="d-input" type="tel" placeholder="मोबाइल नंबर"></div>
+  <div style="margin-bottom:8px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">UPI भुगतान ID</label><input id="profUpi" class="d-input" placeholder="merchant@upi"></div>
+  <div style="margin-bottom:8px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">GSTIN (वैकल्पिक)</label><input id="profGst" class="d-input" placeholder="09AAAAA0000A1Z5"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+    <button type="button" class="btn-cancel" style="background:#eef2ff;color:#0284c7;font-weight:800;" onclick="downloadRoyalPoster()">⬇️ रॉयल A4 पोस्टर</button>
+    <button type="button" class="btn-cancel" style="font-weight:800;" onclick="setPinPrompt()">🔐 PIN बदलें</button>
+  </div>
+  <button type="button" class="btn-cancel" style="width:100%;margin-top:8px;background:#fff1f2;border:1px solid #fecdd3;color:var(--red);font-weight:800;" onclick="openRecycleBin()">
+    🗑️ रीसायकल बिन (हटाए गए लेन-देन)
+  </button>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+    <button type="button" class="btn-cancel" style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;font-weight:800;" onclick="downloadBackupJSON()">📥 बैकअप डाउनलोड</button>
+    <button type="button" class="btn-cancel" style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-weight:800;" onclick="triggerRestoreJSON()">📤 बैकअप रीस्टोर</button>
+  </div>
+  <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="handleRestoreFile(event)">
+
+  <div class="modalrow" style="margin-top:14px;">
+    <button type="button" class="btn-cancel" onclick="closeModal('settingsModal')">रद्द करें</button>
+    <button type="button" class="btn-save" onclick="saveSettingsData()">सुरक्षित करें ✓</button>
+  </div>
+</div></div>
+
+<!-- डिजिटल UPI QR मोडल -->
+<div class="modal" id="qrModal"><div class="box">
+  <div style="background:linear-gradient(145deg,#0a192f,#020c1b);border-radius:24px;padding:20px;text-align:center;color:#fff;">
+    <div style="font-size:17px;font-weight:900;color:#fde047;" id="qrShopTitle">मेरी दुकान</div>
+    <div style="background:#fff;border-radius:18px;padding:12px;display:inline-block;margin:12px auto;position:relative;">
+      <div id="qrCanvasContainer"></div>
+    </div>
+    <div style="font-size:12px;font-weight:800;color:#6ee7b7;" id="qrUpiText">UPI सेट करें ⚙</div>
+  </div>
+  <div class="modalrow">
+    <button type="button" class="btn-cancel" onclick="closeModal('qrModal')">बंद करें</button>
+    <button type="button" class="btn-save" onclick="downloadRoyalPoster()">⬇ रॉयल A4 पोस्टर डाउनलोड</button>
+  </div>
+</div></div>
+
+<!-- गेम / मुंशी जी बैठक मोडल -->
+<div class="modal" id="gameModal"><div class="box">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="logo.png" style="width:40px;height:40px;border-radius:12px;border:2px solid var(--primary);object-fit:cover;" alt="ड्रैगन">
+      <div>
+        <h2 style="font-size:15px;font-weight:900;color:var(--primary);margin:0;">मुंशी जी की बैठक</h2>
+        <p style="font-size:10px;color:var(--muted);margin:0;">देसी गद्दी मनोरंजन व बरकत</p>
+      </div>
+    </div>
+    <div class="vault-badge">
+      <span>🪙</span>
+      <span id="gameVaultBal">0.00</span>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+    <button type="button" onclick="feedChai()" style="border:1px solid #fde68a;background:#fffbeb;color:#b45309;padding:14px 10px;border-radius:16px;font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <span style="font-size:24px;">☕</span>
+      <span>चाय पिलाओ (<span id="modalChaiCount">0</span>)</span>
+    </button>
+    <button type="button" onclick="hitKutai()" style="border:1px solid #fecdd3;background:#fff1f2;color:var(--red);padding:14px 10px;border-radius:16px;font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <span style="font-size:24px;">🩴</span>
+      <span>कुटाई करो (<span id="modalKutaiCount">0</span>)</span>
+    </button>
+  </div>
+  <div class="modalrow" style="margin-top:16px;">
+    <button type="button" class="btn-cancel" onclick="closeModal('gameModal')" style="grid-column:1/-1;">वापस गद्दी पर जाएँ</button>
+  </div>
+</div></div>
+
+<!-- रीसायकल बिन मोडल -->
+<div class="modal" id="recycleBinModal"><div class="box">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div>
+      <h2 style="font-size:16px;font-weight:900;color:var(--primary);margin:0;">🗑️ रीसायकल बिन</h2>
+      <p style="font-size:10px;color:var(--muted);margin-top:2px;">हटाए गए लेन-देन यहाँ सुरक्षित हैं</p>
+    </div>
+    <button type="button" onclick="emptyRecycleBin()" style="border:0;background:#fee2e2;color:#ef4444;font-size:10px;font-weight:800;padding:5px 8px;border-radius:8px;">सब साफ़ करें</button>
+  </div>
+  <div id="recycleBinList" style="display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;"></div>
+  <div class="modalrow" style="margin-top:16px;">
+    <button type="button" class="btn-cancel" onclick="closeModal('recycleBinModal')" style="grid-column:1/-1;">बंद करें</button>
+  </div>
+</div></div>
+
+<!-- क्लिनिक सेटअप मोडल -->
+<div class="modal" id="clinicSetupModal"><div class="box">
+  <h2 style="font-size:16px;font-weight:900;color:var(--primary);margin-bottom:10px;">क्लिनिक व डॉक्टर सेटअप</h2>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">क्लिनिक / अस्पताल का नाम</label><input id="setClinicName" class="d-input" placeholder="उदा. आरोग्य रिहैब व थेरेपी क्लिनिक"></div>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">डॉक्टर / थेरेपिस्ट नाम व डिग्री</label><input id="setDocName" class="d-input" placeholder="उदा. डॉ. आर. पी. सिंह (B.P.T, न्यूरोथेरेपिस्ट)"></div>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">पंजीकरण सं. (Reg. No / RMP)</label><input id="setDocReg" class="d-input" placeholder="उदा. UP-RMP-2026/A"></div>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">क्लिनिक का पूरा पता</label><input id="setClinicAddress" class="d-input" placeholder="उदा. मेन चौराहा, उत्तर प्रदेश"></div>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">संपर्क फ़ोन / WhatsApp</label><input id="setClinicPhone" class="d-input" type="tel" placeholder="मोबाइल नंबर"></div>
+  <div style="margin-bottom:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+      <label style="font-size:10.5px;font-weight:800;color:var(--muted);">Google Maps लोकेशन लिंक</label>
+      <button type="button" onclick="fetchCurrentLocation('clinic')" style="border:0;background:var(--primary);color:#fff;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:6px;">📍 GPS लें</button>
+    </div>
+    <input id="setClinicMap" class="d-input" placeholder="https://maps.google.com/?q=lat,lng">
+  </div>
+  <div class="modalrow">
+    <button type="button" class="btn-cancel" onclick="closeModal('clinicSetupModal')">बंद करें</button>
+    <button type="button" class="btn-save" onclick="saveClinicSetup()">सुरक्षित करें ✓</button>
+  </div>
+</div></div>
+
+<!-- फार्मेसी सेटअप मोडल -->
+<div class="modal" id="pharmaSetupModal"><div class="box">
+  <h2 style="font-size:16px;font-weight:900;color:var(--primary);margin-bottom:10px;">फार्मेसी सेटअप</h2>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">मेडिकल स्टोर का नाम</label><input id="setPhName" class="d-input" placeholder="उदा. आरोग्य मेडिकल व फार्मेसी"></div>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">ड्रग लाइसेंस सं. (D.L. No.)</label><input id="setPhDl" class="d-input" placeholder="उदा. UP-DL-8942"></div>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">दुकान का पूरा पता</label><input id="setPhAddress" class="d-input" placeholder="उदा. ज़िला अस्पताल रोड, बहराइच"></div>
+  <div style="margin-bottom:10px;"><label style="font-size:10.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:2px;">इमरजेंसी हेल्पलाइन फ़ोन</label><input id="setPhPhone" class="d-input" type="tel" placeholder="मोबाइल नंबर"></div>
+  <div style="margin-bottom:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+      <label style="font-size:10.5px;font-weight:800;color:var(--muted);">Google Maps लोकेशन लिंक</label>
+      <button type="button" onclick="fetchCurrentLocation('pharma')" style="border:0;background:var(--primary);color:#fff;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:6px;">📍 GPS लें</button>
+    </div>
+    <input id="setPhMap" class="d-input" placeholder="https://maps.google.com/?q=lat,lng">
+  </div>
+  <div class="modalrow">
+    <button type="button" class="btn-cancel" onclick="closeModal('pharmaSetupModal')">बंद करें</button>
+    <button type="button" class="btn-save" onclick="savePharmaSetup()">सुरक्षित करें ✓</button>
+  </div>
+</div></div>
+
+<!-- कस्टम Rx आइटम एडर मोडल -->
+<div class="modal" id="rxCustomItemModal"><div class="box">
+  <h2 id="rxCustomItemTitle" style="font-size:15px;font-weight:900;color:var(--primary);margin-bottom:8px;">नया आइटम जोड़ें</h2>
+  <textarea id="customRxInput" class="d-input" style="height:80px;padding:8px;resize:none;font-size:12px;" placeholder="यहाँ पूरा विवरण लिखें..."></textarea>
+  <div class="modalrow">
+    <button type="button" class="btn-cancel" onclick="closeModal('rxCustomItemModal')">रद्द करें</button>
+    <button type="button" class="btn-save" onclick="saveCustomRxItem()">पर्चे में जोड़ें ✓</button>
+  </div>
+</div></div>
+
+<!-- बैंकिंग कमिंग सून मोडल -->
+<div class="modal" id="bankingModal"><div class="box" style="text-align:center;">
+  <div style="font-size:42px;margin-bottom:6px;">🏛️</div>
+  <span style="font-size:10px;padding:3px 10px;background:#fef3c7;color:#92400e;border-radius:10px;font-weight:800;">🔐 Coming Soon</span>
+  <h2 style="font-size:16px;font-weight:900;color:var(--primary);margin-top:8px;">व्यापारी बैंकिंग व चालू खाता</h2>
+  <p style="font-size:11.5px;color:var(--muted);line-height:1.6;margin:8px 0 16px;">दुकानदारों के लिए जीरो-बैलेंस डिजिटल चालू खाता सीधे आपकी गद्दी से जोड़े जा रहे हैं।</p>
+  <button type="button" class="btn-save" style="width:100%;" onclick="closeModal('bankingModal')">समझ गया ✓</button>
+</div></div>
+
+<!-- ऐप पिन सुरक्षा लॉक स्क्रीन -->
+<div id="appPinLockOverlay" style="position:fixed;inset:0;background:linear-gradient(135deg,#075c43,#043f2e);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#ffffff;width:100%;max-width:320px;border-radius:26px;padding:24px 20px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.45);">
+    <img src="logo.png" style="width:68px;height:68px;margin-bottom:10px;object-fit:cover;border-radius:18px;" alt="Logo">
+    <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:800;color:var(--primary);">🔐 चुपाकाबरा सुरक्षा लॉक</h3>
+    <p style="font-size:11.5px;color:var(--muted);margin-bottom:16px;">दुकान बहीखाता खोलने हेतु 4-अंकीय पिन दर्ज करें</p>
+    <input type="password" id="unlockAppPinInput" maxlength="4" class="d-input" placeholder="••••" style="text-align:center;font-size:24px;letter-spacing:10px;height:48px;background:#f8fafc;">
+    <button type="button" class="btn-save" style="width:100%;margin-top:14px;" onclick="verifyAppUnlockPin()">अनलॉक करें 🔓</button>
+  </div>
+</div>
+
+<div id="universalPrintArea"></div>
+<!-- ================= JAVASCRIPT MASTER ENGINE ================= -->
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 1. FIREBASE & CLOUD CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyB-nWyD4RtphSv7WazRgM7o3Eaj2NwgPek",
+  authDomain: "chupakabra-khata.firebaseapp.com",
+  projectId: "chupakabra-khata",
+  storageBucket: "chupakabra-khata.firebasestorage.app",
+  messagingSenderId: "872712106347",
+  appId: "1:872712106347:web:48fc0bfcd7b9e182d89c2e"
+};
+try { firebase.initializeApp(firebaseConfig); } catch(e){}
+const auth = typeof firebase !== "undefined" && firebase.auth ? firebase.auth() : null;
+const db = typeof firebase !== "undefined" && firebase.firestore ? firebase.firestore() : null;
+let currentUser = null;
+
+const TURTLEMINT_URL = "https://advisor.turtlemintinsurance.com/profile/RAV4412722/ravindra_pratap_singh";
+
+// 2. STORAGE KEYS
+const PK = "chupaProfile_final", CK = "chupaCustomers_final", PINKEY = "chupaPin_final";
+const VK = "chupaVault_final", BK = "chupaBillCount_final", RK = "chupaReactions_final";
+const RBK = "chupaRecycleBin_final", EXPK = "chupaExpenses_final";
+const CLINIKEY = "chupaClinicProfile_final", RXCUSTOMKEY = "chupaRxCustom_final", PHARMAKEY = "chupaPharmaProfile_final";
+
+function safeSet(k, v) {
+  try { localStorage.setItem(k, JSON.stringify(v)); }
+  catch(e) { if (e.name === 'QuotaExceededError' || e.code === 22) alert("⚠️ स्टोरेज मेमोरी भर गई है!"); }
+}
+function safeGet(k, f) {
+  try {
+    const r = localStorage.getItem(k);
+    if (!r) return f;
+    const t = r.trim();
+    if (t.startsWith("{") || t.startsWith("[")) return JSON.parse(t);
+    try { return JSON.parse(decodeURIComponent(escape(atob(t)))); } catch(err) { return JSON.parse(t); }
+  } catch(e) { return f; }
+}
+
+// 3. APPLICATION STATE
+let profile = safeGet(PK, {
+  shopName: "चुपाकाबरा खाता",
+  shopAddress: "मेन बाज़ार, उत्तर प्रदेश",
+  shopPhone: "9876543210",
+  merchantName: "सत्यप्रकाश सिंह",
+  gender: "male",
+  upi: "9818589869@ptyes",
+  gstin: ""
+});
+
+let clinicProfile = safeGet(CLINIKEY, {
+  name: "आरोग्य रिहैब व थेरेपी क्लिनिक",
+  doc: "डॉ. आर. पी. सिंह (B.P.T, न्यूरोथेरेपिस्ट)",
+  reg: "UP-RMP-2026/A",
+  address: "मेन चौराहा, उत्तर प्रदेश",
+  phone: "9369913187",
+  mapUrl: "https://maps.google.com/?q=27.5706,81.5977"
+});
+
+let pharmaProfile = safeGet(PHARMAKEY, {
+  name: "आरोग्य मेडिकल व फार्मेसी",
+  dl: "UP-DL-8942",
+  address: "निकट ज़िला अस्पताल, उत्तर प्रदेश",
+  phone: "9369913187",
+  mapUrl: "https://maps.google.com/?q=27.5706,81.5977"
+});
+
+let customRxItems = safeGet(RXCUSTOMKEY, { c: [], t: [], a: [] });
+let customers = safeGet(CK, []);
+let expenses = safeGet(EXPK, []);
+let recycleBin = safeGet(RBK, []);
+let vault = Number(localStorage.getItem(VK) || "0.00");
+let billCount = Number(localStorage.getItem(BK) || "101");
+let reactions = safeGet(RK, { chai: 14, kutai: 2, visits: 85 });
+
+let active = null, txType = "give", editingTxIndex = -1, editingExpIndex = -1;
+let isMuted = localStorage.getItem("chupaMute") === "1";
+let activeBillMode = 'kaccha';
+let isExpenseOpen = false, isGovOpen = false;
+let currentPartyView = "customer";
+
+let cart = [
+  { name: "सरसों तेल", qty: 2, unit: "लीटर", rate: 140, gst: 5 },
+  { name: "गेहूँ आटा", qty: 5, unit: "किलो", rate: 35, gst: 0 }
+];
+
+let pharmaCart = [
+  { name: "Paracetamol 650mg", batch: "B-2401", qty: 10, rate: 2.5 },
+  { name: "Pantoprazole 40mg", batch: "P-988", qty: 10, rate: 9.0 }
+];
+
+let rxMode = "therapy";
+let currentAdderType = 'c';
+
+const rxDataLibrary = {
+  therapy: {
+    complaints: ["सर्वाइकल स्पॉन्डिलाइटिस", "साइटिका (L4-L5 डिस्क)", "फ्रोजन शोल्डर (कंधा जाम)", "घुटने का दर्द (Osteoarthritis)", "माइग्रेन / आधासीसी", "कमर दर्द (Lumbago)", "लकवा / पैरालिसिस रिहैब", "टेनिस एल्बो", "हील पेन", "अपच व नाभि डिगना"],
+    treatment: ["ड्राई कपिंग थेरेपी (5 Cups)", "वेट कपिंग / हिजामा (डिटॉक्स)", "न्यूरोथेरेपी नवल स्टिम्युलेशन", "Tens + IFT फिजियो थेरेपी", "अल्ट्रासाउंड पेन रिलीफ", "मैनुअल जॉइंट मोबिलाइज़ेशन", "स्पाइन ट्रैक्शन", "हर्बल पोटली स्वेदन"],
+    advice: ["तकिया लगाना पूरी तरह बंद रखें", "गरम पानी की सिकाई (दिन में 2 बार)", "कमर सीधी रखकर बैठें", "भारी वज़न बिल्कुल न उठाएं", "स्ट्रेचिंग कसरत 15 मिनट सुबह", "ठंडी व बादी चीज़ों से परहेज"]
+  },
+  medical: {
+    complaints: ["वायरल फीवर / बुखार", "गले में खराश व सूखी खांसी", "एसिडिटी व पेट दर्द (GERD)", "डायरिया / लूज मोशन", "हाई बीपी", "दाद, खाज, खुजली", "कमजोरी व चक्कर", "जोड़ों का दर्द"],
+    treatment: ["Paracetamol 650mg SOS", "Pantoprazole 40mg (खाली पेट)", "Amoxicillin + Clav 625mg BD", "ORS + Zinc घोल दिन में 3 बार", "Levocetirizine 5mg रात को", "B-Complex + Multivitamin OD", "Diclofenac Gel"],
+    advice: ["उबला पानी पिएं", "हल्का व सुपाच्य भोजन", "3 दिन बाद फॉलो-अप दिखाएं", "दवा का पूरा कोर्स लें", "धूल व ठंडी हवा से बचें"]
+  },
+  rural: {
+    complaints: ["सामान्य हरारत व बदन दर्द", "मौसमी सर्दी-जुकाम", "पेट में मरोड़ व गैस", "साधारण घाव व खरोंच", "उल्टी व दस्त का आरंभ", "आंखों में लाली व जलन", "सिरदर्द व थकान"],
+    treatment: ["बुखार प्राथमिक गोली (OTC)", "गैस नाशक एंटासिड सिरप", "ओआरएस इलेक्ट्रोलाइट पैकेट", "एंटीसेप्टिक डेटॉल ड्रेसिंग", "दर्द निवारक बाम लेप", "सलाइन नेज़ल ड्रॉप्स", "CHC / ज़िला अस्पताल रेफरल"],
+    advice: ["तत्काल आराम करें व पर्याप्त तरल लें", "लक्षण 24 घंटे में न सुधरें तो तुरंत डॉक्टर दिखाएं", "कोई भारी एंटीबायोटिक बिना जांच न लें"]
+  }
+};
+
+let selRxComplaints = new Set();
+let selRxTreatments = new Set();
+let selRxAdvices = new Set();
+
+reactions.visits = (reactions.visits || 0) + 1;
+safeSet(RK, reactions);
+
+// 4. FIREBASE AUTHENTICATION & AUTO-SYNC
+if (auth) {
+  auth.onAuthStateChanged(user => {
+    currentUser = user;
+    updateAuthUI(user);
+    if (user && db) {
+      db.collection("merchants").doc(user.uid).get().then(doc => {
+        if (doc.exists) {
+          const d = doc.data();
+          if (d.customers && d.customers.length >= customers.length) {
+            customers = d.customers || [];
+            expenses = d.expenses || [];
+            if (d.profile) profile = d.profile;
+            if (d.clinicProfile) clinicProfile = d.clinicProfile;
+            if (d.pharmaProfile) pharmaProfile = d.pharmaProfile;
+            if (d.customRxItems) customRxItems = d.customRxItems;
+            syncData(false);
+            profileUI();
+            renderCustomerList();
+            updateDashboardSummary();
+            toast("☁️ क्लाउड डेटा लोड हुआ ✓");
+          }
+        } else {
+          syncData(true);
+        }
+      }).catch(err => console.log(err));
+    }
+  });
+}
+
+function updateAuthUI(user) {
+  const badge = document.getElementById("firebaseStatusBadge");
+  const loggedOut = document.getElementById("firebaseLoggedOutBox");
+  const loggedIn = document.getElementById("firebaseLoggedInBox");
+  const emailDisp = document.getElementById("loggedInUserEmail");
+  if (!badge) return;
+
+  if (user) {
+    badge.textContent = "🟢 ऑनलाइन (Auto-Sync)";
+    badge.style.background = "#dcfce7";
+    badge.style.color = "#15803d";
+    if (loggedOut) loggedOut.style.display = "none";
+    if (loggedIn) loggedIn.style.display = "block";
+    if (emailDisp) emailDisp.textContent = user.email || "अकाउंट सक्रिय";
+  } else {
+    badge.textContent = "🔴 ऑफ़लाइन";
+    badge.style.background = "#fee2e2";
+    badge.style.color = "#ef4444";
+    if (loggedOut) loggedOut.style.display = "block";
+    if (loggedIn) loggedIn.style.display = "none";
+  }
+}
+
+async function handleFirebaseLogin() {
+  if (!auth) { toast("Firebase लोड नहीं है"); return; }
+  const email = document.getElementById("fbAuthEmail").value.trim();
+  const pass = document.getElementById("fbAuthPass").value.trim();
+  if (!email || !pass) { alert("कृपया ईमेल और पासवर्ड भरें!"); return; }
+  try {
+    toast("लॉगिन हो रहा है... 🔐");
+    await auth.signInWithEmailAndPassword(email, pass);
+    toast("क्लाउड से जुड़ गए ☁️✓");
+  } catch (err) {
+    alert("लॉगिन त्रुटि: " + err.message);
+  }
+}
+
+async function handleFirebaseSignup() {
+  if (!auth) { toast("Firebase लोड नहीं है"); return; }
+  const email = document.getElementById("fbAuthEmail").value.trim();
+  const pass = document.getElementById("fbAuthPass").value.trim();
+  if (!email || pass.length < 6) { alert("मान्य ईमेल और कम से कम 6 अक्षरों का पासवर्ड भरें!"); return; }
+  try {
+    toast("नया खाता बनाया जा रहा है... ☁️️");
+    await auth.createUserWithEmailAndPassword(email, pass);
+    toast("खाता बन गया व सुरक्षित हुआ ✓");
+  } catch (err) {
+    alert("साइनअप त्रुटि: " + err.message);
+  }
+}
+
+function handleFirebaseLogout() {
+  if (auth && confirm("क्या आप क्लाउड से लॉगआउट करना चाहते हैं?")) {
+    auth.signOut().then(() => {
+      currentUser = null;
+      updateAuthUI(null);
+      toast("लॉगआउट हुआ 🚪");
+    });
+  }
+}
+
+function manualCloudSync() {
+  if (!currentUser || !db) { alert("कृपया पहले ईमेल से लॉगिन करें!"); return; }
+  toast("डेटा क्लाउड में सिंक हो रहा है... ⏳");
+  db.collection("merchants").doc(currentUser.uid).set({
+    profile, clinicProfile, pharmaProfile, customRxItems, customers, expenses,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    toast("सारा डेटा क्लाउड में सुरक्षित हुआ ☁️✓");
+  }).catch(e => {
+    alert("सिंक त्रुटि: " + e.message);
+  });
+}
+
+// 5. मुख्य नेविगेशन व व्हाइट स्क्रीन फिक्स इंजन
+function switchMainTab(tab) {
+  closeAllDesks();
+  const homeView = document.getElementById("homeMainView");
+  const servicesView = document.getElementById("servicesMainView");
+  const custView = document.getElementById("customerManagerView");
+  const detailView = document.getElementById("detailView");
+  const tabHome = document.getElementById("bHome");
+  const tabServices = document.getElementById("bServices");
+
+  custView.style.display = "none";
+  detailView.style.display = "none";
+
+  if (tab === 'services') {
+    homeView.style.display = "none";
+    servicesView.style.display = "block";
+    tabServices.classList.add("active");
+    tabHome.classList.remove("active");
+  } else {
+    servicesView.style.display = "none";
+    homeView.style.display = "block";
+    tabHome.classList.add("active");
+    tabServices.classList.remove("active");
+    updateDashboardSummary();
+  }
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function openCustomerManagerScreen() {
+  closeAllDesks();
+  document.getElementById("homeMainView").style.display = "none";
+  document.getElementById("servicesMainView").style.display = "none";
+  document.getElementById("detailView").style.display = "none";
+  document.getElementById("customerManagerView").style.display = "block";
+  document.getElementById("bHome").classList.remove("active");
+  document.getElementById("bServices").classList.remove("active");
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  renderCustomerList();
+}
+
+function closeCustomerManagerScreen() {
+  switchMainTab('home');
+}
+
+// 6. आवश्यक यूटिलिटीज़
+function esc(x){ return String(x??"").replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' })[m]); }
+function money(n){ return "₹" + Number(n||0).toLocaleString("en-IN"); }
+function bal(c){ return (c && c.tx ? c.tx : []).reduce((s,t) => s + (t.type==="give" ? +t.amount : -t.amount), 0); }
+function init(n){ return (n||"?").trim().charAt(0) || "?"; }
+function toast(s){ let e = document.getElementById("toastMsg"); if(!e) return; e.textContent = s; e.classList.add("show"); clearTimeout(window.tt); window.tt = setTimeout(() => e.classList.remove("show"), 2200); }
+function closeModal(id){ document.getElementById(id).style.display = "none"; }
+
+function syncData(toCloud = true){
+  safeSet(CK, customers);
+  safeSet(PK, profile);
+  safeSet(CLINIKEY, clinicProfile);
+  safeSet(PHARMAKEY, pharmaProfile);
+  safeSet(RXCUSTOMKEY, customRxItems);
+  safeSet(EXPK, expenses);
+  safeSet(RBK, recycleBin);
+  safeSet(RK, reactions);
+  try {
+    localStorage.setItem(VK, vault.toFixed(2));
+    localStorage.setItem(BK, String(billCount));
+  } catch(e){}
+  if (toCloud && currentUser && db) {
+    db.collection("merchants").doc(currentUser.uid).set({
+      profile, clinicProfile, pharmaProfile, customRxItems, customers, expenses,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(e => console.log("Cloud sync error: ", e));
+  }
+}
+
+function addVaultReward(amount = 0.05) {
+  const today = new Date().toISOString().slice(0, 10);
+  const key = "chupaDailyEarned_" + today;
+  let earnedToday = Number(localStorage.getItem(key) || "0");
+  if (earnedToday < 2.00) {
+    const toAdd = Math.min(amount, 2.00 - earnedToday);
+    vault += toAdd;
+    earnedToday += toAdd;
+    localStorage.setItem(key, earnedToday.toFixed(2));
+    syncData();
+    profileUI();
+    toast(`+${toAdd.toFixed(2)} बरकत सिक्का तिजोरी में जुड़ा 🪙`);
+  }
+}
+
+// 7. सुरक्षा पिन लॉक इंजन
+function checkAppSecurityLock() {
+  const savedPin = localStorage.getItem(PINKEY);
+  const isUnlocked = sessionStorage.getItem("chupa_unlocked");
+  const overlay = document.getElementById("appPinLockOverlay");
+  if (savedPin && isUnlocked !== "1") { overlay.style.display = "flex"; }
+  else { overlay.style.display = "none"; }
+}
+
+function verifyAppUnlockPin() {
+  const savedPin = localStorage.getItem(PINKEY);
+  const val = document.getElementById("unlockAppPinInput").value.trim();
+  if (savedPin && val === savedPin) {
+    sessionStorage.setItem("chupa_unlocked", "1");
+    document.getElementById("appPinLockOverlay").style.display = "none";
+    toast("गद्दी अनलॉक हुई 🔓✓");
+    speakMunshiHonorific();
+  } else {
+    alert("गलत पिन! पुनः प्रयास करें।");
+    document.getElementById("unlockAppPinInput").value = "";
+  }
+}
+
+function setPinPrompt() {
+  const cur = localStorage.getItem(PINKEY);
+  const p = prompt(cur ? "नया 4 अंकों का सुरक्षा PIN दर्ज करें (हटाने हेतु खाली छोड़ें):" : "4 अंकों का सुरक्षा PIN दर्ज करें:");
+  if (p === null) return;
+  if (!p.trim()) {
+    localStorage.removeItem(PINKEY);
+    sessionStorage.removeItem("chupa_unlocked");
+    toast("सुरक्षा PIN हटा दिया गया 🔓");
+    return;
+  }
+  if (/^\d{4}$/.test(p.trim())) {
+    localStorage.setItem(PINKEY, p.trim());
+    sessionStorage.setItem("chupa_unlocked", "1");
+    toast("नया 4-अंकीय पिन लॉक सक्रिय 🔐✓");
+  } else {
+    alert("कृपया केवल 4 अंकों का संख्यात्मक पिन डालें!");
+  }
+}
+
+// 8. मुंशी जी वॉयस व मैस्कॉट
+let synthVoices = [];
+function loadVoices() { if ('speechSynthesis' in window) synthVoices = window.speechSynthesis.getVoices(); }
+loadVoices();
+if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = loadVoices;
+
+function speakMunshi(text) {
+  const bubble = document.getElementById("mascotBubble");
+  const img = document.getElementById("chupaImg");
+  if(bubble) {
+    bubble.textContent = text;
+    bubble.style.display = "block";
+    if(img) img.classList.add("talking");
+    clearTimeout(window.mtt);
+    window.mtt = setTimeout(() => { 
+      bubble.style.display = "none"; 
+      if(img) img.classList.remove("talking");
+    }, 4500);
+  }
+  if (isMuted || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'hi-IN'; u.pitch = 0.72; u.rate = 0.95;
+  if (!synthVoices.length) synthVoices = window.speechSynthesis.getVoices();
+  const maleVoice = synthVoices.find(v => v.lang.includes('hi') && (v.name.toLowerCase().includes('male') || !v.name.toLowerCase().includes('female')));
+  if (maleVoice) u.voice = maleVoice;
+  u.onend = () => { if(img) img.classList.remove("talking"); };
+  u.onerror = () => { if(img) img.classList.remove("talking"); };
+  window.speechSynthesis.speak(u);
+}
+
+function speakMunshiHonorific() {
+  const name = profile.merchantName || "लाला जी";
+  const quotes = [
+    `प्रणाम ${name}! गद्दी का बहीखाता एकदम दुरुस्त है।`,
+    `मेहनत की कमाई में ही सबसे बड़ी बरकत है ${name}!`,
+    `रोकड़ा समय पर आ जाए तो सुकून ही अलग होता है!`,
+    `एक-एक पाई का हिसाब साफ रखिए, मुंशी जी का पूरा पहरा है!`
+  ];
+  speakMunshi(quotes[Math.floor(Math.random() * quotes.length)]);
+}
+
+function toggleMascotMute(e) {
+  if(e) e.stopPropagation();
+  isMuted = !isMuted;
+  localStorage.setItem("chupaMute", isMuted ? "1" : "0");
+  document.getElementById("mascotMuteBtn").textContent = isMuted ? "🔇" : "🔊";
+  toast(isMuted ? "मुंशी जी म्यूट हैं 🔇" : "मुंशी जी बोलने लगे 🔊");
+}
+
+function feedChai(){
+  const img = document.getElementById("chupaImg");
+  if(img) { img.classList.remove("joy","kutai"); void img.offsetWidth; img.classList.add("joy"); }
+  reactions.chai = (reactions.chai || 0) + 1;
+  syncData(); profileUI();
+  document.getElementById("modalChaiCount").textContent = reactions.chai;
+  speakMunshi("आहा! कड़क अदरक वाली चाय... गद्दी की जय हो मालिक!");
+}
+function hitKutai(){
+  const img = document.getElementById("chupaImg");
+  if(img) { img.classList.remove("joy","kutai"); void img.offsetWidth; img.classList.add("kutai"); }
+  reactions.kutai = (reactions.kutai || 0) + 1;
+  syncData(); profileUI();
+  document.getElementById("modalKutaiCount").textContent = reactions.kutai;
+  speakMunshi("अरे बाप रे! चप्पल पड़ गई... मुंशी जी से कोई भूल नहीं होगी!");
+}
+
+// 9. डैशबोर्ड व आज का कारोबार
+function updateDashboardSummary() {
+  let get = 0, give = 0;
+  customers.forEach(c => {
+    let b = bal(c);
+    if(b >= 0) get += b; else give += Math.abs(b);
+  });
+  document.getElementById("dispTotalGet").textContent = money(get);
+  document.getElementById("dispTotalGive").textContent = money(give);
+  renderTodayBusinessCard();
+}
+
+function renderTodayBusinessCard() {
+  let sales = 0, received = 0, credit = 0, count = 0;
+  const today = new Intl.DateTimeFormat("hi-IN", {day:"numeric",month:"short",year:"numeric"}).format(new Date());
+
+  customers.forEach(c => {
+    (c.tx || []).forEach(t => {
+      if(t.date && (t.date === today || t.date.includes(today))) {
+        count++;
+        if(t.type === "give"){ credit += Number(t.amount || 0); sales += Number(t.amount || 0); }
+        else { received += Number(t.amount || 0); }
+      }
+    });
+  });
+
+  const box = document.getElementById("premiumBusinessSummaryContainer");
+  if(!box) return;
+  box.innerHTML = `
+    <div style="background:linear-gradient(145deg,#075c43,#043f2e);color:#fff;border-radius:22px;padding:15px;margin-bottom:12px;box-shadow:0 12px 28px rgba(7,92,67,0.18);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div>
+          <div style="font-size:13px;font-weight:900;">📊 आज का कारोबार</div>
+          <div style="font-size:9.5px;color:#a7f3d0;">दैनिक लेन-देन लाइव सार</div>
+        </div>
+        <div style="background:rgba(255,255,255,.12);padding:4px 8px;border-radius:8px;font-size:9.5px;font-weight:700;">${count} लेन-देन</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:rgba(16,185,129,.18);border:1px solid rgba(52,211,153,.25);border-radius:14px;padding:9px;">
+          <div style="font-size:9.5px;color:#d1fae5;">💰 भुगतान मिला</div>
+          <strong style="display:block;margin-top:3px;font-size:16px;color:#6ee7b7;">${money(received)}</strong>
+        </div>
+        <div style="background:rgba(225,29,72,.18);border:1px solid rgba(251,113,133,.25);border-radius:14px;padding:9px;">
+          <div style="font-size:9.5px;color:#ffe4e6;">🧾 आज का उधार</div>
+          <strong style="display:block;margin-top:3px;font-size:16px;color:#fda4af;">${money(credit)}</strong>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 10. वीडियो वाले ग्राहक ⇋ व्यापारी भाई फीचर्स व इनलाइन वैलिडेशन
+function clearInlineError(inputId, errId) {
+  const el = document.getElementById(inputId);
+  const err = document.getElementById(errId);
+  if (el) el.classList.remove('input-error');
+  if (err) err.style.display = 'none';
+}
+
+function switchPartyMode(mode) {
+  currentPartyView = mode;
+  const isCust = mode === 'customer';
+  
+  document.getElementById("tabPartyCust").style.background = isCust ? "var(--primary)" : "transparent";
+  document.getElementById("tabPartyCust").style.color = isCust ? "#fff" : "#475569";
+  document.getElementById("tabPartySupp").style.background = !isCust ? "var(--primary)" : "transparent";
+  document.getElementById("tabPartySupp").style.color = !isCust ? "#fff" : "#475569";
+  
+  document.getElementById("partyListLabel").textContent = isCust ? "ग्राहक खाता सूची" : "व्यापारी भाई सूची";
+  document.getElementById("dedicatedFormHeading").textContent = isCust ? "＋ नया ग्राहक खाता जोड़ें" : "＋ नया व्यापारी भाई खाता जोड़ें";
+  
+  const submitBtn = document.getElementById("dedPartySubmitBtn");
+  if (isCust) {
+    document.getElementById("dedRadioCust").checked = true;
+    submitBtn.textContent = "ग्राहक जोड़ें ✓";
+    submitBtn.style.backgroundColor = "#1e5bb8"; // नीला
+  } else {
+    document.getElementById("dedRadioSupp").checked = true;
+    submitBtn.textContent = "सप्लायर जोड़ें ✓";
+    submitBtn.style.backgroundColor = "#107c41"; // गहरा हरा
+  }
+  
+  clearInlineError('dedName', 'dedNameErr');
+  clearInlineError('dedPhoneWrap', 'dedPhoneErr');
+  renderCustomerList();
+}
+
+function syncPartyRadio(type) {
+  switchPartyMode(type);
+}
+
+function renderCustomerList() {
+  const q = (document.getElementById("ledgerSearchInput") ? document.getElementById("ledgerSearchInput").value : "").toLowerCase().trim();
+  const box = document.getElementById("customersListContainer");
+  if (!box) return;
+
+  const list = customers.filter(c => (c.partyType || "customer") === currentPartyView && ((c.name||"").toLowerCase().includes(q) || String(c.phone||"").includes(q)));
+  document.getElementById("countDrawerSubtitle").textContent = `${customers.length} कुल खाते दर्ज`;
+
+  if(!list.length) {
+    box.innerHTML = `<div class="empty">कोई ${currentPartyView === 'customer' ? 'ग्राहक' : 'व्यापारी'} खाता नहीं मिला। ऊपर फॉर्म से नया जोड़ें।</div>`;
+    return;
+  }
+
+  box.innerHTML = list.map(c => {
+    const b = bal(c);
+    const isGet = b >= 0;
+    return `
+      <div class="customer" onclick="openDetail(${c.id})">
+        <div class="left">
+          <div class="avatar">${init(c.name)}</div>
+          <div>
+            <div class="cname">${esc(c.name)}</div>
+            <div class="phone">📞 ${esc(c.phone)}${c.address ? ` • ${esc(c.address)}`:''}</div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="amt ${isGet ? 'receive' : 'pay'}">${money(Math.abs(b))}</div>
+          <div class="status ${isGet ? 'receive' : 'pay'}">${isGet ? 'लेना है' : 'देना है'}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function saveDedicatedCustomer() {
+  const nameEl = document.getElementById("dedName");
+  const phoneEl = document.getElementById("dedPhone");
+  const phoneWrap = document.getElementById("dedPhoneWrap");
+  const n = nameEl.value.trim();
+  const p = phoneEl.value.trim();
+  const addr = document.getElementById("dedAddress").value.trim();
+
+  let hasErr = false;
+  if (!n) {
+    nameEl.classList.add('input-error');
+    document.getElementById("dedNameErr").style.display = "block";
+    hasErr = true;
+  }
+  if (!p || !/^\d{10}$/.test(p)) {
+    phoneWrap.classList.add('input-error');
+    document.getElementById("dedPhoneErr").style.display = "block";
+    hasErr = true;
+  }
+  if (hasErr) return;
+
+  const sel = document.querySelector('input[name="dedPartyType"]:checked');
+  const pType = sel ? sel.value : currentPartyView;
+
+  customers.unshift({ id: Date.now(), name: n, phone: p, address: addr, partyType: pType, tx: [] });
+  syncData();
+  
+  nameEl.value = "";
+  phoneEl.value = "";
+  document.getElementById("dedAddress").value = "";
+  clearInlineError('dedName', 'dedNameErr');
+  clearInlineError('dedPhoneWrap', 'dedPhoneErr');
+
+  renderCustomerList();
+  updateDashboardSummary();
+  toast(pType === 'customer' ? "ग्राहक सुरक्षित हुआ ✓" : "सप्लायर सुरक्षित हुआ ✓");
+  speakMunshi(`${n} का खाता खुल गया!`);
+}
+
+// 11. डिटेल खाता व्यू (व्हाइट स्क्रीन एरर से पूर्णतः मुक्त)
+function openDetail(id){
+  const c = customers.find(x => x.id === id);
+  if(!c) { toast("खाता लोड नहीं हो सका!"); return; }
+  active = id;
+  if (!c.tx) c.tx = [];
+
+  document.getElementById("homeMainView").style.display = "none";
+  document.getElementById("servicesMainView").style.display = "none";
+  document.getElementById("customerManagerView").style.display = "none";
+  document.getElementById("detailView").style.display = "block";
+  window.scrollTo({ top: 0, behavior: 'instant' });
+
+  document.getElementById("dAvatar").textContent = init(c.name);
+  document.getElementById("dName").textContent = c.name;
+  document.getElementById("dPhone").textContent = "📞 +91 " + c.phone;
+  document.getElementById("dAddress").textContent = c.address ? "📍 " + c.address : "";
+
+  const partyTag = document.getElementById("dPartyTag");
+  if (c.partyType === 'supplier') {
+    partyTag.textContent = "सप्लायर भाई";
+    partyTag.style.background = "#dcfce7";
+    partyTag.style.color = "#15803d";
+  } else {
+    partyTag.textContent = "ग्राहक";
+    partyTag.style.background = "#e0f2fe";
+    partyTag.style.color = "#0284c7";
+  }
+
+  const b = bal(c);
+  document.getElementById("dAmount").textContent = money(Math.abs(b));
+  document.getElementById("dAmount").style.color = b >= 0 ? "var(--red)" : "var(--green)";
+  document.getElementById("dStatus").textContent = b >= 0 ? "आपको लेना है (बाकी)" : "आपको देना है (जमा)";
+
+  const due = document.getElementById("dDueDateBadge");
+  if(c.dueDate && b > 0) {
+    due.style.display = "inline-block";
+    due.textContent = `🚨 वसूली तारीख: ${c.dueDate}`;
+  } else {
+    due.style.display = "none";
+  }
+
+  renderDetailTxList(c);
+}
+
+function backToMainSlide(){
+  document.getElementById("detailView").style.display = "none";
+  document.getElementById("customerManagerView").style.display = "block";
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  renderCustomerList();
+  updateDashboardSummary();
+}
+
+function renderDetailTxList(c){
+  const box = document.getElementById("transactionsDetailList");
+  if(!c.tx || !c.tx.length){
+    box.innerHTML = '<div class="empty">अभी कोई लेन-देन दर्ज नहीं है</div>';
+    return;
+  }
+  box.innerHTML = c.tx.slice().reverse().map((t, i) => {
+    let realIdx = c.tx.length - 1 - i;
+    return `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:12.5px;font-weight:800;">${esc(t.note || (t.type==="give" ? "माल दिया" : "माल लिया"))}</div>
+          <div style="font-size:9.5px;color:var(--muted);margin-top:2px;">${esc(t.date)}${t.dueDate ? ` • <span style="color:var(--red);font-weight:700">वसूली: ${esc(t.dueDate)}</span>`:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <strong style="font-size:14px;color:${t.type==="give"?'var(--red)':'var(--green)'};">${t.type==="give"?'+':'−'} ${money(t.amount)}</strong>
+          <button type="button" onclick="editTx(${realIdx})" style="border:0;background:#e0f2fe;color:#0284c7;border-radius:6px;width:26px;height:26px;font-weight:800;" title="सुधारें">✏️</button>
+          <button type="button" onclick="deleteTx(${realIdx})" style="border:0;background:#fee2e2;color:#ef4444;border-radius:6px;width:26px;height:26px;font-weight:800;" title="हटाएं">×</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openTx(type){
+  txType = type;
+  editingTxIndex = -1;
+  document.getElementById("txTitle").textContent = type === "give" ? "माल दिया (उधार) दर्ज करें" : "माल लिया (जमा) दर्ज करें";
+  document.getElementById("txSaveBtn").textContent = "हिसाब सेव करें ✓";
+  document.getElementById("txAmount").value = "";
+  document.getElementById("txNote").value = "";
+  document.getElementById("txDate").value = new Date().toISOString().split("T")[0];
+  const now = new Date();
+  document.getElementById("txTime").value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById("txDueDateBox").style.display = (type === "give") ? "block" : "none";
+  document.getElementById("txDueDate").value = "";
+  document.getElementById("txModal").style.display = "flex";
+}
+
+function editTx(i) {
+  const c = customers.find(x => x.id === active);
+  if(!c || !c.tx || !c.tx[i]) return;
+  const t = c.tx[i];
+  editingTxIndex = i;
+  txType = t.type;
+  document.getElementById("txTitle").textContent = "हिसाब संशोधित करें (Edit ✏️)";
+  document.getElementById("txSaveBtn").textContent = "बदलाव सुरक्षित करें ✓";
+  document.getElementById("txAmount").value = t.amount;
+  document.getElementById("txNote").value = t.note || "";
+  document.getElementById("txDate").value = t.rawDate || new Date().toISOString().split("T")[0];
+  document.getElementById("txDueDateBox").style.display = (t.type === "give") ? "block" : "none";
+  document.getElementById("txDueDate").value = t.dueDate || "";
+  document.getElementById("txModal").style.display = "flex";
+}
+
+function saveTx(){
+  const a = Number(document.getElementById("txAmount").value);
+  const note = document.getElementById("txNote").value.trim();
+  const selDate = document.getElementById("txDate").value;
+  const selTime = document.getElementById("txTime").value;
+  const dueDate = document.getElementById("txDueDate").value;
+  if(!a || a <= 0){ toast("मान्य राशि दर्ज करें"); return; }
+  const c = customers.find(x => x.id === active);
+  if(!c) return;
+  if(!c.tx) c.tx = [];
+
+  const now = new Date();
+  let timeStr = selTime || now.toLocaleTimeString("hi-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+  let dateStr = "";
+  if(selDate && selDate.includes("-")) {
+    const parts = selDate.split("-");
+    const mNames = ['जन॰','फ़र॰','मार्च','अप्रैल','मई','जून','जुलाई','अग॰','सित॰','अक्तू॰','नव॰','दिस॰'];
+    dateStr = `${Number(parts[2])} ${mNames[Number(parts[1])-1]} ${parts[0]}, ${timeStr}`;
+  } else {
+    dateStr = `${now.toLocaleDateString("hi-IN", { day: "numeric", month: "short", year: "numeric" })}, ${timeStr}`;
+  }
+
+  const txData = {
+    amount: a,
+    type: txType,
+    note: note || (txType === "give" ? "माल दिया" : "माल लिया"),
+    date: dateStr,
+    rawDate: selDate,
+    dueDate: (txType === "give" ? dueDate : "")
+  };
+
+  if(editingTxIndex >= 0 && c.tx[editingTxIndex]) {
+    c.tx[editingTxIndex] = txData;
+    editingTxIndex = -1;
+    toast("हिसाब अपडेट हुआ ✏️✓");
+  } else {
+    c.tx.push(txData);
+    addVaultReward(0.05);
+    toast("हिसाब सुरक्षित हुआ ✓");
+    speakMunshi(txType === "get" ? `₹${a} का भुगतान दर्ज हुआ!` : `₹${a} का उधार चढ़ाया गया!`);
+  }
+
+  if(dueDate && txType === "give") c.dueDate = dueDate;
+
+  syncData();
+  closeModal("txModal");
+  openDetail(active);
+  updateDashboardSummary();
+}
+
+function deleteTx(i){
+  if(!confirm("क्या यह प्रविष्टि हटाना चाहते हैं? यह रीसायकल बिन में सुरक्षित रहेगी।")) return;
+  const c = customers.find(x => x.id === active);
+  if(!c || !c.tx || !c.tx[i]) return;
+
+  const removed = c.tx.splice(i, 1)[0];
+  recycleBin.unshift({
+    id: Date.now(), custId: c.id, custName: c.name, tx: removed,
+    deletedAt: new Intl.DateTimeFormat("hi-IN", {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).format(new Date())
+  });
+  syncData();
+  openDetail(active);
+  updateDashboardSummary();
+  toast("प्रविष्टि रीसायकल बिन में भेजी गई 🗑");
+}
+
+function editCustomer(){
+  const c = customers.find(x => x.id === active);
+  if(!c) return;
+  const newName = prompt("नाम संपादित करें:", c.name);
+  if(!newName || !newName.trim()) return;
+  const newPhone = prompt("मोबाइल नंबर (10 अंक):", c.phone);
+  if(!newPhone || !/^\d{10}$/.test(newPhone.trim())) return;
+  const newAddr = prompt("पता / लैंडमार्क संपादित करें:", c.address || "");
+
+  c.name = newName.trim();
+  c.phone = newPhone.trim();
+  c.address = newAddr ? newAddr.trim() : "";
+  syncData();
+  openDetail(c.id);
+  toast("प्रोफाइल अपडेट हुई ✏️✓");
+}
+
+function whatsappReminder(){
+  const c = customers.find(x => x.id === active);
+  if(!c) return;
+  const b = bal(c);
+  if(b <= 0){ alert("इस खाते पर कोई बाकी नहीं है!"); return; }
+  const shop = profile.shopName ? `*${profile.shopName}*` : "*चुपाकाबरा खाता*";
+  const upi = profile.upi ? `\nUPI भुगतान ID: *${profile.upi}*` : "";
+  const msg = `नमस्ते *${c.name}* जी 🙏\n${shop} पर आपका कुल *₹${b}* का हिसाब बाकी है।\nकृपया समय पर चुकता करें।${upi}\n\nधन्यवाद!\n_Powered by चुपाकाबरा खाता 🐉_`;
+  window.open(`https://wa.me/91${c.phone}?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+// 12. गद्दी रोज़नामचा (दुकान व घरेलू खर्च)
+function toggleExpenseDrawer() {
+  isExpenseOpen = !isExpenseOpen;
+  document.getElementById("expenseDrawer").style.display = isExpenseOpen ? "block" : "none";
+  document.getElementById("expenseToggleBtn").textContent = isExpenseOpen ? "खर्च समेटें 📁" : "खर्च खोलें 📂";
+  if(isExpenseOpen) renderExpenses();
+}
+
+function toggleGovDrawer() {
+  isGovOpen = !isGovOpen;
+  document.getElementById("govDrawer").style.display = isGovOpen ? "grid" : "none";
+  document.getElementById("govToggleBtn").textContent = isGovOpen ? "समेटें ↗" : "सेवाएँ खोलें ↗";
+}
+
+function saveNewExpense(){
+  const amt = Number(document.getElementById("expAmount").value);
+  const cat = document.getElementById("expCategory").value;
+  const note = document.getElementById("expNote").value.trim();
+  const cDate = document.getElementById("expDate").value;
+  if(!amt || amt <= 0){ toast("खर्च राशि भरें"); return; }
+
+  let dObj = cDate ? new Date(cDate + "T12:00:00") : new Date();
+  const dStr = new Intl.DateTimeFormat("hi-IN", {day:"numeric",month:"short",year:"numeric"}).format(dObj);
+  const mKey = `${dObj.getMonth()+1}-${dObj.getFullYear()}`;
+
+  if(editingExpIndex >= 0 && expenses[editingExpIndex]) {
+    expenses[editingExpIndex].amount = amt;
+    expenses[editingExpIndex].category = cat;
+    expenses[editingExpIndex].note = note || cat;
+    expenses[editingExpIndex].date = dStr;
+    expenses[editingExpIndex].monthKey = mKey;
+    editingExpIndex = -1;
+    document.getElementById("expSubmitBtn").textContent = "खर्च सुरक्षित करें ✓";
+    document.getElementById("expCancelEditBtn").style.display = "none";
+    document.getElementById("expFormTitle").textContent = "＋ नया खर्च दर्ज करें (तेल, दूध, किराया आदि)";
+    toast("खर्च अपडेट हुआ ✏️✓");
+  } else {
+    expenses.unshift({ id: Date.now(), amount: amt, category: cat, note: note || cat, date: dStr, monthKey: mKey });
+    toast("खर्च दर्ज हुआ ✓");
+    speakMunshi(`₹${amt} का खर्च नोट कर लिया!`);
+  }
+
+  syncData();
+  document.getElementById("expAmount").value = "";
+  document.getElementById("expNote").value = "";
+  renderExpenses();
+}
+
+function editExpense(idx) {
+  const e = expenses[idx];
+  if(!e) return;
+  editingExpIndex = idx;
+  document.getElementById("expAmount").value = e.amount;
+  document.getElementById("expCategory").value = e.category;
+  document.getElementById("expNote").value = e.note;
+  document.getElementById("expFormTitle").textContent = "खर्च संशोधित करें (Edit ✏️)";
+  document.getElementById("expSubmitBtn").textContent = "बदलाव सुरक्षित करें ✓";
+  document.getElementById("expCancelEditBtn").style.display = "inline-block";
+  document.getElementById("expAmount").focus();
+}
+
+function cancelExpenseEdit() {
+  editingExpIndex = -1;
+  document.getElementById("expAmount").value = "";
+  document.getElementById("expNote").value = "";
+  document.getElementById("expFormTitle").textContent = "＋ नया खर्च दर्ज करें (तेल, दूध, किराया आदि)";
+  document.getElementById("expSubmitBtn").textContent = "खर्च सुरक्षित करें ✓";
+  document.getElementById("expCancelEditBtn").style.display = "none";
+}
+
+function renderExpenses(){
+  const box = document.getElementById("expenseListContainer");
+  if(!box) return;
+  const now = new Date();
+  const mKey = `${now.getMonth()+1}-${now.getFullYear()}`;
+  let mTotal = 0;
+  expenses.forEach(e => { if(e.monthKey === mKey) mTotal += Number(e.amount||0); });
+
+  document.getElementById("expThisMonthSummary").textContent = `इस महीने कुल: ₹${mTotal.toLocaleString("en-IN")}`;
+  if(!expenses.length){
+    box.innerHTML = '<div class="empty">अभी कोई खर्च दर्ज नहीं है</div>';
+    return;
+  }
+  box.innerHTML = expenses.slice(0, 30).map((e, idx) => `
+    <div style="background:#fff;border:1px solid var(--line);border-left:4px solid #b45309;border-radius:12px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:12px;font-weight:800;">${esc(e.note)} <span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:4px;">${esc(e.category)}</span></div>
+        <div style="font-size:9.5px;color:var(--muted);margin-top:1px;">📅 ${esc(e.date)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <strong style="color:#b45309;font-size:13px;">₹${Number(e.amount).toLocaleString("en-IN")}</strong>
+        <button type="button" onclick="editExpense(${idx})" style="border:0;background:#e0f2fe;color:#0284c7;border-radius:6px;width:24px;height:24px;font-weight:800;">✏️</button>
+        <button type="button" onclick="deleteExpenseItem(${idx})" style="border:0;background:#fee2e2;color:#ef4444;border-radius:6px;width:24px;height:24px;font-weight:800;">×</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function deleteExpenseItem(idx){
+  if(!confirm("क्या यह खर्च हटाना चाहते हैं?")) return;
+  expenses.splice(idx, 1);
+  syncData();
+  renderExpenses();
+  toast("खर्च हटाया गया 🗑️");
+}
+
+function shareExpenseWhatsApp(){
+  const now = new Date();
+  const mKey = `${now.getMonth()+1}-${now.getFullYear()}`;
+  const curr = expenses.filter(e => e.monthKey === mKey);
+  if(!curr.length){ toast("इस महीने कोई खर्च दर्ज नहीं है!"); return; }
+
+  let tot = 0, txt = `*${profile.shopName}*\n🪙 *गद्दी मासिक खर्च विवरण*\n--------------------\n`;
+  curr.slice(0, 25).forEach((e, i) => {
+    tot += Number(e.amount||0);
+    txt += `${i+1}. ${e.date} | ${e.note} (${e.category}): ₹${e.amount}\n`;
+  });
+  txt += `--------------------\n*कुल मासिक खर्च: ₹${tot.toLocaleString("en-IN")}*\n_चुपाकाबरा खाता द्वारा प्रेषित_ 🐉`;
+  window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+}
+
+// 13. क्लिनिक व 5 Rx पर्चा इंजन
+function showClinicDesk(){
+  document.getElementById("homeMainView").style.display = "none";
+  document.getElementById("servicesMainView").style.display = "none";
+  document.getElementById("detailView").style.display = "none";
+  document.getElementById("pharmacyDesk").style.display = "none";
+  document.getElementById("billingDesk").style.display = "none";
+  document.getElementById("customerManagerView").style.display = "none";
+  document.getElementById("clinicDesk").style.display = "block";
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  updateClinicUI();
+  initRxClouds();
+}
+
+function closeAllDesks(){
+  document.getElementById("clinicDesk").style.display = "none";
+  document.getElementById("pharmacyDesk").style.display = "none";
+  document.getElementById("billingDesk").style.display = "none";
+  document.getElementById("detailView").style.display = "none";
+  document.getElementById("customerManagerView").style.display = "none";
+  document.getElementById("servicesMainView").style.display = "none";
+  document.getElementById("homeMainView").style.display = "block";
+  document.getElementById("bHome").classList.add("active");
+  document.getElementById("bServices").classList.remove("active");
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function updateClinicUI(){
+  document.getElementById("dispClinicName").textContent = clinicProfile.name || "आरोग्य रिहैब व थेरेपी क्लिनिक";
+  let s = clinicProfile.doc || "डॉ. आर. पी. सिंह";
+  if(clinicProfile.reg) s += ` | Reg: ${clinicProfile.reg}`;
+  if(clinicProfile.mapUrl) s += ` | 📍 मैप एक्टिव`;
+  document.getElementById("dispClinicSub").textContent = s;
+}
+
+function setRxCategory(cat){
+  rxMode = cat;
+  document.querySelectorAll(".rx-mode-tab").forEach(t => {
+    const act = t.getAttribute("data-rxm") === cat;
+    t.style.background = act ? "var(--primary)" : "#edf4f0";
+    t.style.color = act ? "#fff" : "var(--muted)";
+  });
+  const lbl = document.getElementById("rxTreatLbl");
+  if(cat === "rural") lbl.textContent = "प्राथमिक उपचार (Safe OTC):";
+  else if(cat === "medical") lbl.textContent = "दवाइयाँ व प्रिस्क्रिप्शन (Rx):";
+  else lbl.textContent = "थेरेपी व उपचार प्रोटोकॉल:";
+  selRxComplaints.clear(); selRxTreatments.clear(); selRxAdvices.clear();
+  initRxClouds();
+}
+
+function initRxClouds(){
+  const d = rxDataLibrary[rxMode];
+  const allC = [...d.complaints, ...(customRxItems.c || [])];
+  const allT = [...d.treatment, ...(customRxItems.t || [])];
+  const allA = [...d.advice, ...(customRxItems.a || [])];
+
+  document.getElementById("rxComplaintsCloud").innerHTML = allC.map(it => `
+    <span class="btn-cancel" onclick="toggleRxTag('c', '${it}')" style="height:28px;line-height:28px;padding:0 10px;font-size:11px;font-weight:700;border-radius:8px;background:${selRxComplaints.has(it)?'var(--primary)':'#f1f5f9'};color:${selRxComplaints.has(it)?'#fff':'#334155'};">${it}</span>
+  `).join("");
+
+  document.getElementById("rxTreatmentCloud").innerHTML = allT.map(it => `
+    <span class="btn-cancel" onclick="toggleRxTag('t', '${it}')" style="height:28px;line-height:28px;padding:0 10px;font-size:11px;font-weight:700;border-radius:8px;background:${selRxTreatments.has(it)?'var(--primary)':'#f1f5f9'};color:${selRxTreatments.has(it)?'#fff':'#334155'};">${it}</span>
+  `).join("");
+
+  document.getElementById("rxAdviceCloud").innerHTML = allA.map(it => `
+    <span class="btn-cancel" onclick="toggleRxTag('a', '${it}')" style="height:28px;line-height:28px;padding:0 10px;font-size:11px;font-weight:700;border-radius:8px;background:${selRxAdvices.has(it)?'var(--primary)':'#f1f5f9'};color:${selRxAdvices.has(it)?'#fff':'#334155'};">${it}</span>
+  `).join("");
+}
+
+function toggleRxTag(type, val){
+  let s = type === 'c' ? selRxComplaints : type === 't' ? selRxTreatments : selRxAdvices;
+  if(s.has(val)) s.delete(val); else s.add(val);
+  initRxClouds();
+}
+
+function updateRxCategoryBadge(){
+  const val = parseInt(document.getElementById("rxTemplatePicker").value);
+  const badge = document.getElementById("rxCategoryBadge");
+  const names = [
+    "1. सादा / क्लासिक फॉर्मल",
+    "2. मॉडर्न फिजियो व न्यूरो",
+    "3. पारंपरिक आयुष व नाड़ी",
+    "4. थर्मल रोल पर्चा",
+    "5. एग्जीक्यूटिव मिनिमल"
+  ];
+  badge.textContent = names[val - 1] || "मानक पर्चा";
+}
+
+function openRxItemAdder(type){
+  currentAdderType = type;
+  document.getElementById("customRxInput").value = "";
+  document.getElementById("rxCustomItemModal").style.display = "flex";
+}
+
+function saveCustomRxItem(){
+  const val = document.getElementById("customRxInput").value.trim();
+  if(!val) return;
+  if(!customRxItems[currentAdderType]) customRxItems[currentAdderType] = [];
+  if(!customRxItems[currentAdderType].includes(val)) customRxItems[currentAdderType].push(val);
+  if(currentAdderType === 'c') selRxComplaints.add(val);
+  else if(currentAdderType === 't') selRxTreatments.add(val);
+  else selRxAdvices.add(val);
+  syncData();
+  closeModal("rxCustomItemModal");
+  initRxClouds();
+}
+
+function editClinicSetup(){
+  document.getElementById("setClinicName").value = clinicProfile.name || "";
+  document.getElementById("setDocName").value = clinicProfile.doc || "";
+  document.getElementById("setDocReg").value = clinicProfile.reg || "";
+  document.getElementById("setClinicAddress").value = clinicProfile.address || "";
+  document.getElementById("setClinicPhone").value = clinicProfile.phone || "";
+  document.getElementById("setClinicMap").value = clinicProfile.mapUrl || "";
+  document.getElementById("clinicSetupModal").style.display = "flex";
+}
+
+function saveClinicSetup(){
+  clinicProfile.name = document.getElementById("setClinicName").value.trim();
+  clinicProfile.doc = document.getElementById("setDocName").value.trim();
+  clinicProfile.reg = document.getElementById("setDocReg").value.trim();
+  clinicProfile.address = document.getElementById("setClinicAddress").value.trim();
+  clinicProfile.phone = document.getElementById("setClinicPhone").value.trim();
+  clinicProfile.mapUrl = document.getElementById("setClinicMap").value.trim();
+  syncData();
+  updateClinicUI();
+  closeModal("clinicSetupModal");
+  toast("क्लिनिक सेटअप सुरक्षित हुआ ✓");
+}
+
+function printClinicPrescription(){
+  const name = document.getElementById("rxPtName").value.trim();
+  if(!name){ alert("कृपया मरीज़ का नाम दर्ज करें!"); return; }
+  const ageGen = document.getElementById("rxPtAgeGender").value.trim() || "-";
+  const phone = document.getElementById("rxPtPhone").value.trim() || "-";
+  const next = document.getElementById("rxPtNext").value.trim() || "आवश्यकतानुसार";
+  const tplId = parseInt(document.getElementById("rxTemplatePicker").value);
+  const today = new Date().toLocaleDateString('hi-IN');
+  const pArea = document.getElementById("universalPrintArea");
+
+  const complaints = Array.from(selRxComplaints).join(", ") || "सामान्य क्लिनिकल परीक्षण";
+  const treatments = Array.from(selRxTreatments).map((t, i) => `<div><b>${i+1}.</b> ${t}</div>`).join("") || "परामर्श पूर्ण";
+  const advices = Array.from(selRxAdvices).map(a => `<div>• ${a}</div>`).join("") || "सावधानी रखें";
+
+  let outHTML = "";
+  if(tplId === 2) {
+    outHTML = `
+      <div class="paper-a4 tpl-rehab" style="background:#fff;">
+        <div style="background:#075c43;color:#fff;padding:12px 16px;border-radius:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <h2 style="font-size:18px;margin:0;font-weight:900;">${esc(clinicProfile.name)}</h2>
+            <div style="font-size:11px;font-weight:700;">${esc(clinicProfile.doc)} | Reg: ${esc(clinicProfile.reg)}</div>
+            <div style="font-size:9.5px;color:#a7f3d0;">${esc(clinicProfile.address)} | मो.: ${esc(clinicProfile.phone)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:6px;">PHYSIO & REHAB</div>
+            <div style="font-size:10px;margin-top:3px;">दिनांक: ${today}</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 8px;background:#f8fafc;border-radius:8px;font-size:11px;border:1px solid #e2e8f0;">
+          <div>मरीज़: <b>${esc(name)}</b> (${esc(ageGen)})</div>
+          <div>मो.: <b>${esc(phone)}</b></div>
+        </div>
+        <div style="margin:10px 0;padding:6px 10px;background:#fff1f2;border:1px solid #fecdd3;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:10.5px;">
+          <b>दर्द तीव्रता स्केल (VAS 0-10):</b>
+          <span>[ 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 ]</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+          <div style="border:1px solid #cbd5e1;border-radius:8px;padding:10px;">
+            <b style="font-size:11px;color:#075c43;">लक्षण व समस्या (Complaints):</b>
+            <div style="font-size:11.5px;margin-top:4px;line-height:1.5;">${complaints}</div>
+          </div>
+          <div style="border:1px solid #cbd5e1;border-radius:8px;padding:10px;">
+            <b style="font-size:11px;color:#075c43;">थेरेपी प्रोटोकॉल (Treatment):</b>
+            <div style="font-size:11.5px;margin-top:4px;line-height:1.5;">${treatments}</div>
+          </div>
+        </div>
+        <div style="border:1px solid #cbd5e1;border-radius:8px;padding:10px;margin-top:10px;">
+          <b style="font-size:11px;color:#075c43;">घरेलू कसरत व सलाह:</b>
+          <div style="font-size:11.5px;margin-top:4px;line-height:1.5;">${advices}</div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;"><b>अगली सिटिंग:</b> ${esc(next)}</div>
+        <div style="margin-top:35px;display:flex;justify-content:space-between;align-items:flex-end;">
+          <small style="font-size:9px;color:#64748b;">* चुपाकाबरा खाता 🐉</small>
+          <div style="text-align:center;font-size:11px;border-top:1px solid #000;width:130px;padding-top:2px;">फिजियोथेरेपिस्ट हस्ताक्षर</div>
+        </div>
+      </div>
+    `;
+  } else {
+    outHTML = `
+      <div class="paper-a4 tpl-classic" style="background:#fff;">
+        <div style="border-bottom:2px solid #075c43;padding-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <h2 style="font-size:20px;font-weight:900;color:#075c43;margin:0;">${esc(clinicProfile.name)}</h2>
+            <p style="font-size:12px;font-weight:700;margin:2px 0;">${esc(clinicProfile.doc)}</p>
+            ${clinicProfile.reg ? `<p style="font-size:11px;color:#334155;">पंजीकरण सं.: <b>${esc(clinicProfile.reg)}</b></p>`:''}
+            <p style="font-size:10px;color:#64748b;">${esc(clinicProfile.address)} | संपर्क: ${esc(clinicProfile.phone)}</p>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:26px;font-weight:900;color:#075c43;">℞</div>
+            <div style="font-size:11px;font-weight:700;">दिनांक: ${today}</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #cbd5e1;font-size:11.5px;margin-top:4px;">
+          <div>मरीज़: <b>${esc(name)}</b> (${esc(ageGen)})</div>
+          <div>मो.: <b>${esc(phone)}</b></div>
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:11px;font-weight:800;color:#475569;">लक्षण व समस्या:</div>
+          <div style="font-size:12.5px;font-weight:700;margin:2px 0 8px;">${complaints}</div>
+          <div style="font-size:11px;font-weight:800;color:#475569;">उपचार व थेरेपी प्रोटोकॉल (Rx):</div>
+          <div style="font-size:12.5px;line-height:1.6;margin:2px 0 8px;">${treatments}</div>
+          <div style="font-size:11px;font-weight:800;color:#475569;">घरेलू सलाह व परहेज:</div>
+          <div style="font-size:12px;line-height:1.5;margin:2px 0 8px;">${advices}</div>
+          <div style="margin-top:8px;padding:4px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;display:inline-block;">
+            <b>अगला परामर्श:</b> ${esc(next)}
+          </div>
+        </div>
+        <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:flex-end;">
+          <div style="font-size:9px;color:#64748b;">* चुपाकाबरा खाता 🐉</div>
+          <div style="text-align:center;font-size:11px;font-weight:700;border-top:1px solid #000;width:130px;padding-top:2px;">
+            अधिकृत हस्ताक्षर
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  pArea.innerHTML = outHTML;
+  addVaultReward(0.05);
+  setTimeout(() => { window.print(); pArea.innerHTML = ""; }, 250);
+}
+
+function sendClinicWhatsAppRx(){
+  const name = document.getElementById("rxPtName").value.trim();
+  const phone = document.getElementById("rxPtPhone").value.trim();
+  if(!name){ alert("मरीज़ का नाम लिखें!"); return; }
+  if(!phone || phone.length < 10){ alert("मान्य 10 अंकों का फोन नंबर भरें!"); return; }
+
+  const complaints = Array.from(selRxComplaints).join(", ") || "क्लिनिकल परीक्षण";
+  const treatments = Array.from(selRxTreatments).map((t, i) => `${i+1}. ${t}`).join("\n");
+  const advices = Array.from(selRxAdvices).map(a => `• ${a}`).join("\n");
+  const next = document.getElementById("rxPtNext").value.trim() || "आवश्यकतानुसार";
+
+  let msg = `*${clinicProfile.name}*\n${clinicProfile.doc}\nमो.: ${clinicProfile.phone}\n`;
+  if(clinicProfile.mapUrl) msg += `📍 क्लिनिक लोकेशन:\n${clinicProfile.mapUrl}\n`;
+  msg += `------------------------\nनमस्ते *${name}* जी, आपका क्लिनिकल पर्चा:\n\n*लक्षण:* ${complaints}\n\n*दवा व थेरेपी प्रोटोकॉल:*\n${treatments}\n\n*परहेज:* \n${advices}\n\n*अगला परामर्श:* ${next}\n\nधन्यवाद! 🙏\n_Powered by चुपाकाबरा खाता 🐉_`;
+
+  addVaultReward(0.05);
+  window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+// 14. फार्मेसी व मेडिकल काउंटर
+function showPharmacyDesk(){
+  document.getElementById("homeMainView").style.display = "none";
+  document.getElementById("servicesMainView").style.display = "none";
+  document.getElementById("detailView").style.display = "none";
+  document.getElementById("clinicDesk").style.display = "none";
+  document.getElementById("billingDesk").style.display = "none";
+  document.getElementById("customerManagerView").style.display = "none";
+  document.getElementById("pharmacyDesk").style.display = "block";
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  updatePharmaUI();
+  renderPharmaCart();
+}
+
+function updatePharmaUI(){
+  document.getElementById("dispPharmaName").textContent = pharmaProfile.name || "आरोग्य मेडिकल व फार्मेसी";
+  let s = `डी.एल. सं.: ${pharmaProfile.dl || 'प्रक्रियाधीन'} | मो.: ${pharmaProfile.phone}`;
+  if(pharmaProfile.mapUrl) s += ` | 📍 मैप लिंक सक्रिय`;
+  document.getElementById("dispPharmaSub").textContent = s;
+}
+
+function renderPharmaCart(){
+  const tb = document.getElementById("pharmaTableBody");
+  tb.innerHTML = pharmaCart.map((it, idx) => `
+    <tr>
+      <td style="padding:2px;"><input type="text" value="${esc(it.name)}" oninput="pharmaCart[${idx}].name=this.value" class="d-input" style="height:30px;font-size:11px;padding:2px 4px;"></td>
+      <td style="padding:2px;"><input type="text" value="${esc(it.batch)}" oninput="pharmaCart[${idx}].batch=this.value" class="d-input" style="height:30px;font-size:11px;padding:2px 4px;"></td>
+      <td style="padding:2px;"><input type="number" min="1" value="${it.qty}" oninput="pharmaCart[${idx}].qty=Number(this.value);recalcPharma()" class="d-input" style="height:30px;text-align:center;font-size:11px;padding:2px;"></td>
+      <td style="padding:2px;"><input type="number" value="${it.rate}" oninput="pharmaCart[${idx}].rate=Number(this.value);recalcPharma()" class="d-input" style="height:30px;text-align:right;font-size:11px;padding:2px 4px;"></td>
+    </tr>
+  `).join("");
+  recalcPharma();
+}
+
+function addPharmaRow(){
+  pharmaCart.push({ name: "", batch: "", qty: 1, rate: 0 });
+  renderPharmaCart();
+}
+
+function recalcPharma(){
+  let sub = 0;
+  pharmaCart.forEach(i => sub += (Number(i.qty||0) * Number(i.rate||0)));
+  const disc = Number(document.getElementById("phDiscount").value) || 0;
+  const grand = Math.max(0, sub - disc);
+  document.getElementById("phSubTotal").textContent = "₹" + sub.toFixed(2);
+  document.getElementById("phGrandTotal").textContent = "₹" + grand.toFixed(2);
+}
+
+function editPharmaSetup(){
+  document.getElementById("setPhName").value = pharmaProfile.name || "";
+  document.getElementById("setPhDl").value = pharmaProfile.dl || "";
+  document.getElementById("setPhAddress").value = pharmaProfile.address || "";
+  document.getElementById("setPhPhone").value = pharmaProfile.phone || "";
+  document.getElementById("setPhMap").value = pharmaProfile.mapUrl || "";
+  document.getElementById("pharmaSetupModal").style.display = "flex";
+}
+
+function savePharmaSetup(){
+  pharmaProfile.name = document.getElementById("setPhName").value.trim();
+  pharmaProfile.dl = document.getElementById("setPhDl").value.trim();
+  pharmaProfile.address = document.getElementById("setPhAddress").value.trim();
+  pharmaProfile.phone = document.getElementById("setPhPhone").value.trim();
+  pharmaProfile.mapUrl = document.getElementById("setPhMap").value.trim();
+  syncData();
+  updatePharmaUI();
+  closeModal("pharmaSetupModal");
+  toast("फार्मेसी सेटअप सुरक्षित हुआ ✓");
+}
+
+function printPharmaInvoice(){
+  const cName = document.getElementById("phCustName").value.trim() || "नकद ग्राहक";
+  const docRef = document.getElementById("phDocRef").value.trim() || "-";
+  const pArea = document.getElementById("universalPrintArea");
+  const today = new Date().toLocaleDateString('hi-IN');
+  let sub = 0, rows = "";
+
+  pharmaCart.forEach((it, i) => {
+    if(it.name && it.name.trim()){
+      const tot = Number(it.qty||1) * Number(it.rate||0);
+      sub += tot;
+      rows += `<tr>
+        <td style="padding:4px 2px;border-bottom:1px dashed #cbd5e1;">${i+1}</td>
+        <td style="padding:4px 2px;border-bottom:1px dashed #cbd5e1;"><b>${esc(it.name)}</b></td>
+        <td style="padding:4px 2px;border-bottom:1px dashed #cbd5e1;">${esc(it.batch||'-')}</td>
+        <td style="padding:4px 2px;text-align:center;border-bottom:1px dashed #cbd5e1;">${it.qty}</td>
+        <td style="padding:4px 2px;text-align:right;border-bottom:1px dashed #cbd5e1;">₹${Number(it.rate).toFixed(2)}</td>
+        <td style="padding:4px 2px;text-align:right;border-bottom:1px dashed #cbd5e1;">₹${tot.toFixed(2)}</td>
+      </tr>`;
+    }
+  });
+
+  const disc = Number(document.getElementById("phDiscount").value) || 0;
+  const grand = Math.max(0, sub - disc);
+
+  pArea.innerHTML = `
+    <div class="paper-a4" style="background:#fff;">
+      <div style="border-bottom:2px solid #075c43;padding-bottom:8px;display:flex;justify-content:space-between;">
+        <div>
+          <h2 style="font-size:20px;font-weight:900;color:#075c43;margin:0;">${esc(pharmaProfile.name)}</h2>
+          <p style="font-size:11px;color:#334155;margin:2px 0;">D.L. No.: <b>${esc(pharmaProfile.dl||'प्रक्रियाधीन')}</b></p>
+          <p style="font-size:10px;color:#64748b;">${esc(pharmaProfile.address)} | हेल्पलाइन: ${esc(pharmaProfile.phone)}</p>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:20px;font-weight:900;color:#075c43;">Rx CASH MEMO</div>
+          <div style="font-size:11px;">दिनांक: ${today}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #cbd5e1;font-size:11.5px;">
+        <div>मरीज़: <b>${esc(cName)}</b></div>
+        <div>डॉक्टर: <b>${esc(docRef)}</b></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px;">
+        <thead>
+          <tr style="border-top:1px solid #0f172a;border-bottom:1px solid #0f172a;background:#f8fafc;">
+            <th style="padding:4px 2px;text-align:left;">#</th>
+            <th style="padding:4px 2px;text-align:left;">दवा</th>
+            <th style="padding:4px 2px;text-align:left;">बैच</th>
+            <th style="padding:4px 2px;text-align:center;">मात्रा</th>
+            <th style="padding:4px 2px;text-align:right;">दर</th>
+            <th style="padding:4px 2px;text-align:right;">कुल</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="border-top:1px solid #0f172a;padding-top:6px;margin-top:8px;text-align:right;font-size:13px;">
+        <div>उप-योग: ₹${sub.toFixed(2)}</div>
+        ${disc > 0 ? `<div style="font-size:11px;color:#e11d48;">छूट: -₹${disc.toFixed(2)}</div>`:''}
+        <div style="font-size:16px;font-weight:900;margin-top:2px;">कुल देय राशि: ₹${grand.toFixed(2)}</div>
+      </div>
+      <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:flex-end;">
+        <div style="font-size:9px;color:#64748b;">* चुपाकाबरा खाता 🐉</div>
+        <div style="text-align:center;font-size:11px;font-weight:700;">
+          <div style="border-top:1px solid #000;width:130px;margin-bottom:4px;"></div>
+          अधिकृत फार्मासिस्ट
+        </div>
+      </div>
+    </div>
+  `;
+  addVaultReward(0.05);
+  setTimeout(() => { window.print(); pArea.innerHTML = ""; }, 250);
+}
+
+function sendPharmaWhatsApp(){
+  const phone = document.getElementById("phCustPhone").value.trim();
+  const cName = document.getElementById("phCustName").value.trim() || "ग्राहक";
+  if(!phone || phone.length < 10){ alert("10 अंकों का फोन नंबर भरें!"); return; }
+
+  let sub = 0, lines = "";
+  pharmaCart.forEach((it, i) => {
+    if(it.name && it.name.trim()){
+      const tot = Number(it.qty||1) * Number(it.rate||0);
+      sub += tot;
+      lines += `${i+1}. ${it.name} (बैच: ${it.batch||'-'}) - ${it.qty} x ₹${it.rate} = ₹${tot}\n`;
+    }
+  });
+
+  const disc = Number(document.getElementById("phDiscount").value) || 0;
+  const grand = Math.max(0, sub - disc);
+
+  let msg = `*${pharmaProfile.name}*\nडी.एल. सं.: ${pharmaProfile.dl}\nमो.: ${pharmaProfile.phone}\n`;
+  if(pharmaProfile.mapUrl) msg += `📍 दुकान लोकेशन मैप:\n${pharmaProfile.mapUrl}\n`;
+  msg += `------------------------\nनमस्ते *${cName}* जी, आपका मेडिकल बिल:\n\n${lines}\n*कुल देय राशि: ₹${grand.toFixed(2)}*\n\nधन्यवाद! 🙏\n_Powered by चुपाकाबरा खाता 🐉_`;
+
+  addVaultReward(0.05);
+  window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+// 15. काउंटर बिलिंग व हार्डवेयर स्कैनर
+let barcodeBuffer = '';
+let lastKeyTime = performance.now();
+window.addEventListener('keydown', (e) => {
+  const tag = (document.activeElement.tagName || '').toLowerCase();
+  if (['input', 'textarea', 'select'].includes(tag)) return;
+  const now = performance.now();
+  if (now - lastKeyTime > 90) barcodeBuffer = '';
+  lastKeyTime = now;
+  if (e.key === 'Enter') {
+    if (barcodeBuffer.length >= 4) {
+      handleBarcodeScan(barcodeBuffer.trim());
+      barcodeBuffer = '';
+    }
+  } else if (e.key.length === 1) {
+    barcodeBuffer += e.key;
+  }
+});
+
+function handleBarcodeScan(code) {
+  const item = { name: "स्कैन सामान (" + code.slice(-4) + ")", qty: 1, unit: "पीस", rate: 100, gst: 0 };
+  const exist = cart.find(x => x.name === item.name);
+  if (exist) { exist.qty += 1; } else { cart.push(item); }
+  renderCart();
+  speakMunshi("बारकोड सामान कार्ट में जुड़ गया!");
+}
+
+function showBillingDesk(){
+  document.getElementById("homeMainView").style.display = "none";
+  document.getElementById("servicesMainView").style.display = "none";
+  document.getElementById("detailView").style.display = "none";
+  document.getElementById("clinicDesk").style.display = "none";
+  document.getElementById("pharmacyDesk").style.display = "none";
+  document.getElementById("customerManagerView").style.display = "none";
+  document.getElementById("billingDesk").style.display = "block";
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  renderCart();
+}
+
+function switchBillMode(mode){
+  if (mode === 'gst' && (!profile.gstin || !profile.gstin.trim())) {
+    alert("कृपया पहले सेटिंग्स में GSTIN नंबर दर्ज करें!");
+    return;
+  }
+  activeBillMode = mode;
+  document.getElementById("bTypeKaccha").style.background = mode === 'kaccha' ? "var(--primary)" : "#edf4f0";
+  document.getElementById("bTypeKaccha").style.color = mode === 'kaccha' ? "#fff" : "var(--muted)";
+  document.getElementById("bTypeGst").style.background = mode === 'gst' ? "var(--primary)" : "#edf4f0";
+  document.getElementById("bTypeGst").style.color = mode === 'gst' ? "#fff" : "var(--muted)";
+
+  document.querySelectorAll(".gst-col").forEach(el => el.style.display = (mode === 'gst') ? "" : "none");
+  recalcCart();
+}
+
+function renderCart(){
+  const tb = document.getElementById("cartTableBody");
+  tb.innerHTML = cart.map((it, idx) => `
+    <tr>
+      <td style="padding:2px;"><input type="text" value="${esc(it.name)}" oninput="cart[${idx}].name=this.value" class="d-input" style="height:30px;font-size:11px;padding:2px 4px;"></td>
+      <td style="padding:2px;"><input type="number" min="1" value="${it.qty}" oninput="cart[${idx}].qty=Number(this.value);recalcCart()" class="d-input" style="height:30px;text-align:center;font-size:11px;padding:2px;"></td>
+      <td style="padding:2px;">
+        <select onchange="cart[${idx}].unit=this.value" class="d-input" style="height:30px;font-size:10px;padding:1px;background:#fff;">
+          <option ${it.unit==='किलो'?'selected':''}>किलो</option>
+          <option ${it.unit==='लीटर'?'selected':''}>लीटर</option>
+          <option ${it.unit==='पैकेट'?'selected':''}>पैकेट</option>
+          <option ${it.unit==='पीस'?'selected':''}>पीस</option>
+        </select>
+      </td>
+      <td style="padding:2px;"><input type="number" value="${it.rate}" oninput="cart[${idx}].rate=Number(this.value);recalcCart()" class="d-input" style="height:30px;text-align:right;font-size:11px;padding:2px 4px;"></td>
+      <td style="padding:2px;${activeBillMode==='gst'?'':'display:none'}" class="gst-col">
+        <select onchange="cart[${idx}].gst=Number(this.value);recalcCart()" class="d-input" style="height:30px;font-size:10px;padding:1px;background:#fff;">
+          <option value="0" ${it.gst===0?'selected':''}>0%</option>
+          <option value="5" ${it.gst===5?'selected':''}>5%</option>
+          <option value="12" ${it.gst===12?'selected':''}>12%</option>
+          <option value="18" ${it.gst===18?'selected':''}>18%</option>
+        </select>
+      </td>
+    </tr>
+  `).join("");
+  recalcCart();
+}
+
+function addCartRow(){
+  cart.push({ name: "", qty: 1, unit: "किलो", rate: 0, gst: 0 });
+  renderCart();
+}
+
+function recalcCart(){
+  let sub = 0, totalTax = 0;
+  cart.forEach(i => {
+    const q = Number(i.qty||0), r = Number(i.rate||0);
+    const rowTot = q * r;
+    sub += rowTot;
+    if (activeBillMode === 'gst') totalTax += (rowTot * Number(i.gst||0)) / 100;
+  });
+
+  const disc = Number(document.getElementById("cDiscount").value) || 0;
+  const taxable = Math.max(0, sub - disc);
+  const grand = taxable + (activeBillMode === 'gst' ? totalTax : 0);
+
+  document.getElementById("cSubtotal").textContent = "₹" + sub.toFixed(2);
+  const taxRow = document.getElementById("cTaxRow");
+  if (activeBillMode === 'gst') {
+    taxRow.style.display = "flex";
+    document.getElementById("cTaxVal").textContent = `₹${totalTax.toFixed(2)} (CGST ₹${(totalTax/2).toFixed(2)} + SGST ₹${(totalTax/2).toFixed(2)})`;
+  } else {
+    taxRow.style.display = "none";
+  }
+  document.getElementById("cGrandTotal").textContent = "₹" + grand.toFixed(2);
+}
+
+function sendCartWhatsApp(){
+  const phone = document.getElementById("cartCustPhone").value.trim();
+  const cName = document.getElementById("cartCustName").value.trim() || "ग्राहक";
+  if (!phone || phone.length < 10) { alert("10 अंकों का फोन नंबर भरें!"); return; }
+
+  let sub = 0, totalTax = 0, lines = "";
+  cart.forEach((i, idx) => {
+    if ((i.name && i.name.trim()) || Number(i.rate) > 0) {
+      const q = Number(i.qty||1), r = Number(i.rate||0);
+      const rowTot = q * r;
+      sub += rowTot;
+      let gstTxt = "";
+      if (activeBillMode === 'gst') {
+        totalTax += (rowTot * (i.gst||0)) / 100;
+        gstTxt = ` (GST ${i.gst}%)`;
+      }
+      lines += `${idx+1}. ${i.name} - ${q} ${i.unit} x ₹${r}${gstTxt} = ₹${rowTot}\n`;
+    }
+  });
+
+  const disc = Number(document.getElementById("cDiscount").value) || 0;
+  const grand = Math.max(0, sub - disc) + (activeBillMode === 'gst' ? totalTax : 0);
+
+  let text = `*${profile.shopName}*\nमो.: ${profile.shopPhone}\nनमस्ते *${cName}* जी, आपका बिल:\n\n${lines}\n`;
+  if(disc > 0) text += `छूट: -₹${disc.toFixed(2)}\n`;
+  if(activeBillMode === 'gst') text += `GST कर: ₹${totalTax.toFixed(2)}\n`;
+  text += `*कुल देय राशि: ₹${grand.toFixed(2)}*\n\nभुगतान UPI: ${profile.upi}\n_Powered by चुपाकाबरा खाता 🐉_`;
+
+  addVaultReward(0.05);
+  billCount++;
+  syncData();
+  window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(text)}`, "_blank");
+}
+
+let bluetoothDevice = null, printCharacteristic = null;
+async function connectBluetoothThermal() {
+  if (!navigator.bluetooth) { alert("Chrome ब्राउज़र का उपयोग करें (Web Bluetooth आवश्यक है)"); return false; }
+  try {
+    toast("प्रिंटर खोजा जा रहा है... 🔍");
+    bluetoothDevice = await navigator.bluetooth.requestDevice({
+      filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
+      optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2']
+    });
+    const server = await bluetoothDevice.gatt.connect();
+    let service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+    const characteristics = await service.getCharacteristics();
+    printCharacteristic = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
+    toast("⚡ प्रिंटर कनेक्टेड: " + bluetoothDevice.name);
+    speakMunshi("ब्लूटूथ प्रिंटर तैयार है!");
+    return true;
+  } catch(err) {
+    toast("ब्लूटूथ कनेक्शन रद्द हुआ");
+    return false;
+  }
+}
+
+async function printDirectCartBluetooth() {
+  if (!printCharacteristic) {
+    const ok = await connectBluetoothThermal();
+    if (!ok || !printCharacteristic) return;
+  }
+  const cName = document.getElementById("cartCustName").value.trim() || "नकद";
+  const dStr = new Date().toLocaleDateString('hi-IN');
+  let escCmd = "\x1B\x40\x1B\x61\x01\x1B\x45\x01" + (profile.shopName || "मेरी दुकान") + "\x1B\x45\x00\n";
+  if(profile.shopPhone) escCmd += "मो.: " + profile.shopPhone + "\n";
+  escCmd += "--------------------------------\n\x1B\x61\x00";
+  escCmd += `दिनांक: ${dStr}  बिल: #${billCount}\nग्राहक: ${cName}\n`;
+  escCmd += "--------------------------------\nसामान          मात्रा   भाव   कुल\n--------------------------------\n";
+
+  let sub = 0;
+  cart.forEach(i => {
+    if ((i.name && i.name.trim()) || Number(i.rate) > 0) {
+      let q = Number(i.qty||1), r = Number(i.rate||0), tot = q * r;
+      sub += tot;
+      let nStr = (i.name||"Item").slice(0, 12).padEnd(14, ' ');
+      let qStr = (q + "").padEnd(6, ' ');
+      let rStr = (r + "").padEnd(5, ' ');
+      escCmd += `${nStr}${qStr}${rStr}${tot}\n`;
+    }
+  });
+
+  const disc = Number(document.getElementById("cDiscount").value) || 0;
+  const grand = Math.max(0, sub - disc);
+  escCmd += `--------------------------------\n\x1B\x61\x02उप-योग: Rs.${sub.toFixed(2)}\n`;
+  if(disc > 0) escCmd += `छूट: -Rs.${disc.toFixed(2)}\n`;
+  escCmd += `\x1B\x45\x01कुल राशि: Rs.${grand.toFixed(2)}\x1B\x45\x00\n\n\x1B\x61\x01धन्यवाद! फिर पधारें 🙏\nचुपाकाबरा खाता 🐉\n\n\n\n\x1D\x56\x41\x00`;
+
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(escCmd);
+  for (let i = 0; i < bytes.length; i += 100) {
+    await printCharacteristic.writeValue(bytes.slice(i, i + 100));
+    await new Promise(r => setTimeout(r, 25)); // UI हैंग प्रिवेंशन
+  }
+  billCount++;
+  addVaultReward(0.05);
+  syncData();
+  toast("पर्ची निकल गई ⚡✓");
+}
+
+function printCartInvoice(){
+  const cName = document.getElementById("cartCustName").value.trim() || "नकद ग्राहक";
+  const pArea = document.getElementById("universalPrintArea");
+  const dStr = new Date().toLocaleDateString('hi-IN');
+  const paperSize = document.getElementById("printPaperSize") ? document.getElementById("printPaperSize").value : "roll";
+  const paperClass = paperSize === "a4" ? "paper-a4" : "paper-roll";
+
+  let sub = 0, totalTax = 0, rows = "";
+  cart.forEach((i, idx) => {
+    if ((i.name && i.name.trim()) || Number(i.rate) > 0) {
+      const q = Number(i.qty||1), r = Number(i.rate||0), rowTot = q * r;
+      sub += rowTot;
+      if(activeBillMode === 'gst') totalTax += (rowTot * (i.gst||0)) / 100;
+      rows += `<tr>
+        <td style="padding:4px 2px;border-bottom:1px dashed #ccc;">${idx+1}</td>
+        <td style="padding:4px 2px;border-bottom:1px dashed #ccc;">${esc(i.name)}</td>
+        <td style="padding:4px 2px;text-align:center;border-bottom:1px dashed #ccc;">${q} ${i.unit}</td>
+        <td style="padding:4px 2px;text-align:right;border-bottom:1px dashed #ccc;">₹${r.toFixed(2)}</td>
+        <td style="padding:4px 2px;text-align:right;border-bottom:1px dashed #ccc;">₹${rowTot.toFixed(2)}</td>
+      </tr>`;
+    }
+  });
+
+  const disc = Number(document.getElementById("cDiscount").value) || 0;
+  const grand = Math.max(0, sub - disc) + (activeBillMode === 'gst' ? totalTax : 0);
+
+  pArea.innerHTML = `
+    <div class="${paperClass}" style="background:#fff;">
+      <div style="text-align:center;border-bottom:1px dashed #000;padding-bottom:5px;">
+        <h2 style="font-size:16px;margin:0;font-weight:900;">${esc(profile.shopName)}</h2>
+        <p style="font-size:9.5px;margin:2px 0;">मो.: ${esc(profile.shopPhone)}</p>
+        <p style="font-size:9.5px;">दिनांक: ${dStr} | बिल #${billCount}</p>
+        <p style="font-size:9.5px;">ग्राहक: ${esc(cName)}</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:10px;margin-top:6px;">
+        <thead>
+          <tr style="border-top:1px solid #000;border-bottom:1px solid #000;">
+            <th style="text-align:left;">#</th>
+            <th style="text-align:left;">सामान</th>
+            <th style="text-align:center;">मात्रा</th>
+            <th style="text-align:right;">भाव</th>
+            <th style="text-align:right;">कुल</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="border-top:1px solid #000;padding-top:4px;margin-top:5px;text-align:right;font-size:11px;">
+        <div>उप-योग: ₹${sub.toFixed(2)}</div>
+        ${disc > 0 ? `<div>छूट: -₹${disc.toFixed(2)}</div>`:''}
+        ${activeBillMode === 'gst' ? `<div>GST कर: ₹${totalTax.toFixed(2)}</div>`:''}
+        <div style="font-size:13px;font-weight:900;border-top:1px dashed #000;padding-top:2px;margin-top:2px;">कुल देय: ₹${grand.toFixed(2)}</div>
+      </div>
+      <div style="text-align:center;font-size:8.5px;margin-top:8px;border-top:1px dotted #444;padding-top:4px;">
+        धन्यवाद! फिर पधारें 🙏<br>Powered by चुपाकाबरा खाता 🐉
+      </div>
+    </div>
+  `;
+  billCount++;
+  addVaultReward(0.05);
+  syncData();
+  setTimeout(() => { window.print(); pArea.innerHTML = ""; }, 250);
+}
+
+// 16. A4 स्टैंडी QR पोस्टर इंजन
+function openQR(){
+  if(!profile.upi){ toast("पहले सेटिंग्स में UPI ID जोड़ें"); openProfileDrawer(); return; }
+  const c = customers.find(x => x.id === active);
+  const b = c ? bal(c) : 0;
+  const amt = b > 0 ? b : "";
+  const uri = `upi://pay?pa=${encodeURIComponent(profile.upi)}&pn=${encodeURIComponent(profile.shopName)}${amt ? '&am='+amt+'&cu=INR':''}`;
+
+  document.getElementById("qrShopTitle").textContent = profile.shopName;
+  document.getElementById("qrUpiText").textContent = profile.upi + (amt ? ` • ${money(amt)}` : "");
+  document.getElementById("qrModal").style.display = "flex";
+
+  const container = document.getElementById("qrCanvasContainer");
+  container.innerHTML = "";
+  new QRCode(container, { text: uri, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.H });
+}
+
+function downloadRoyalPoster(){
+  let qrSrc = document.querySelector("#qrCanvasContainer canvas");
+  if(!qrSrc) { openQR(); setTimeout(downloadRoyalPoster, 350); return; }
+
+  const p = document.createElement("canvas");
+  p.width = 2480; p.height = 3508;
+  const ctx = p.getContext("2d");
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+
+  // बैकग्राउंड
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, 3508);
+  bgGrad.addColorStop(0, "#0a192f");
+  bgGrad.addColorStop(0.5, "#060f1d");
+  bgGrad.addColorStop(1, "#02070e");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, 2480, 3508);
+
+  // बॉर्डर
+  ctx.save();
+  ctx.lineWidth = 14;
+  ctx.strokeStyle = "#f59e0b";
+  ctx.strokeRect(90, 90, 2300, 3328);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "rgba(245, 158, 11, 0.4)";
+  ctx.strokeRect(120, 120, 2240, 3268);
+  ctx.restore();
+
+  // हेडर
+  ctx.fillStyle = "#f59e0b";
+  ctx.font = "800 40px 'Plus Jakarta Sans', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("★ OFFICIAL DIRECT MERCHANT REPOSITORY ★", 1240, 230);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 115px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText(profile.shopName || "चुपाकाबरा खाता", 1240, 370);
+
+  ctx.fillStyle = "#38bdf8";
+  ctx.font = "700 46px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("सीधा बैंक खाता भुगतान • शून्य अतिरिक्त शुल्क", 1240, 460);
+
+  // QR कार्ड
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
+  ctx.shadowBlur = 100;
+  ctx.shadowOffsetY = 40;
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.roundRect(390, 640, 1700, 1700, [65]);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.drawImage(qrSrc, 530, 780, 1420, 1420);
+
+  const logoImg = new Image();
+  logoImg.src = "logo.png";
+  logoImg.onload = function() { drawCenterLogoAndFinish(); };
+  logoImg.onerror = function() { drawCenterLogoAndFinish(true); };
+
+  function drawCenterLogoAndFinish(isErr) {
+    const cx = 1240, cy = 1490, r = 160;
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = "#f59e0b";
+    ctx.stroke();
+
+    if(!isErr) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(logoImg, cx - r, cy - r, r * 2, r * 2);
+    }
+    ctx.restore();
+
+    // UPI पिल
+    ctx.save();
+    ctx.fillStyle = "#030c17";
+    ctx.beginPath();
+    ctx.roundRect(390, 2520, 1700, 190, [95]);
+    ctx.fill();
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = "#f59e0b";
+    ctx.stroke();
+
+    ctx.fillStyle = "#fde047";
+    ctx.font = "bold 64px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(profile.upi || "merchant@upi", 1240, 2640);
+    ctx.restore();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 48px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText("GPay • PhonePe • Paytm • BHIM UPI • Any Bank App", 1240, 2870);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "700 36px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText("भारत सरकार NPCI एवं सुरक्षित UPI नेटवर्क द्वारा सीधे अधिकृत", 1240, 2960);
+
+    ctx.fillStyle = "#6ee7b7";
+    ctx.font = "800 42px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText("🔒 100% डायरेक्ट बैंक सेटलमेंट • बिना किसी रुकावट के तुरंत पुष्टि", 1240, 3120);
+
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "800 44px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText("⚡ चुपाकाबरा खाता • भारत की सबसे सुरक्षित डिजिटल गद्दी 🐉", 1240, 3270);
+
+    const a = document.createElement("a");
+    a.href = p.toDataURL("image/png", 1.0);
+    a.download = `${profile.shopName || 'Shop'}_A4_Poster.png`;
+    a.click();
+    toast("रॉयल A4 पोस्टर डाउनलोड हुआ ✓");
+  }
+}
+
+// 17. बैकअप, रीस्टोर व रीसायकल बिन
+function downloadBackupJSON(){
+  const full = { profile, customers, expenses, recycleBin, clinicProfile, pharmaProfile, customRxItems, vault, billCount, reactions };
+  const blob = new Blob([JSON.stringify(full, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Chupakabra_Khata_Backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("📥 पूरा बैकअप डाउनलोड हुआ ✓");
+}
+
+function triggerRestoreJSON(){ document.getElementById("jsonFileInput").click(); }
+function handleRestoreFile(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = function(evt){
+    try {
+      const d = JSON.parse(evt.target.result);
+      if(!d.customers) { alert("अमान्य बैकअप फ़ाइल!"); return; }
+      if(!confirm("क्या आप यह बैकअप रीस्टोर करना चाहते हैं?")) return;
+
+      if(d.profile) profile = d.profile;
+      if(d.customers) customers = d.customers;
+      if(d.expenses) expenses = d.expenses;
+      if(d.recycleBin) recycleBin = d.recycleBin;
+      if(d.clinicProfile) clinicProfile = d.clinicProfile;
+      if(d.pharmaProfile) pharmaProfile = d.pharmaProfile;
+      if(d.customRxItems) customRxItems = d.customRxItems;
+      if(d.vault) vault = Number(d.vault);
+      if(d.billCount) billCount = Number(d.billCount);
+      if(d.reactions) reactions = d.reactions;
+
+      syncData(true);
+      profileUI();
+      renderCustomerList();
+      updateDashboardSummary();
+      closeModal("settingsModal");
+      toast("सारा बहीखाता रीस्टोर हुआ ✓");
+    } catch(err){ alert("फ़ाइल पढ़ने में त्रुटि हुई!"); }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+}
+
+function openRecycleBin(){
+  closeModal('settingsModal');
+  const box = document.getElementById("recycleBinList");
+  box.innerHTML = "";
+  if(!recycleBin.length){
+    box.innerHTML = '<div class="empty">रीसायकल बिन खाली है!</div>';
+  } else {
+    recycleBin.forEach((item, idx) => {
+      box.innerHTML += `
+        <div style="background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:12px;font-weight:800;">${esc(item.custName)}</div>
+            <div style="font-size:10px;color:var(--muted);">${esc(item.tx.note||'लेन-देन')} • ${item.deletedAt}</div>
+            <div style="font-size:12px;font-weight:800;color:${item.tx.type==='give'?'var(--red)':'var(--green)'};">₹${item.tx.amount}</div>
+          </div>
+          <button type="button" onclick="restoreTx(${idx})" class="btn-save" style="height:28px;padding:0 8px;font-size:10px;background:#ecfdf5;color:var(--primary);">↺ वापस लाएं</button>
+        </div>
+      `;
+    });
+  }
+  document.getElementById("recycleBinModal").style.display = "flex";
+}
+
+function restoreTx(idx){
+  const item = recycleBin[idx];
+  const c = customers.find(x => x.id === item.custId);
+  if(!c){ toast("ग्राहक खाता मौजूद नहीं है ❌"); return; }
+  if(!c.tx) c.tx = [];
+  c.tx.push(item.tx);
+  recycleBin.splice(idx, 1);
+  syncData();
+  openRecycleBin();
+  updateDashboardSummary();
+  toast("लेन-देन वापस आ गया ✓");
+}
+
+function emptyRecycleBin(){
+  if(!recycleBin.length) return;
+  if(!confirm("रीसायकल बिन का सारा डेटा मिटाना चाहते हैं?")) return;
+  recycleBin = [];
+  syncData();
+  openRecycleBin();
+  toast("बिन साफ़ हुआ 🗑️✓");
+}
+
+// 18. सेटिंग्स व प्रोफाइल
+function openProfileDrawer(){
+  document.getElementById("profMerchantName").value = profile.merchantName || "";
+  document.getElementById("profShopName").value = profile.shopName || "";
+  document.getElementById("profPhone").value = profile.shopPhone || "";
+  document.getElementById("profAddress").value = profile.shopAddress || "";
+  document.getElementById("profUpi").value = profile.upi || "";
+  document.getElementById("profGst").value = profile.gstin || "";
+  document.getElementById("settingsModal").style.display = "flex";
+}
+
+function saveSettingsData(){
+  profile.merchantName = document.getElementById("profMerchantName").value.trim();
+  profile.shopName = document.getElementById("profShopName").value.trim();
+  profile.shopPhone = document.getElementById("profPhone").value.trim();
+  profile.shopAddress = document.getElementById("profAddress").value.trim();
+  profile.upi = document.getElementById("profUpi").value.trim();
+  profile.gstin = document.getElementById("profGst").value.trim().toUpperCase();
+
+  syncData();
+  profileUI();
+  closeModal("settingsModal");
+  toast("सेटिंग्स सुरक्षित हुईं ✓");
+  speakMunshiHonorific();
+}
+
+function profileUI(){
+  document.getElementById("shopTitleHeader").textContent = profile.shopName || "चुपाकाबरा खाता";
+  document.getElementById("vaultBalanceHeader").textContent = vault.toFixed(2);
+}
+
+function updateLivePanchang(){
+  const days = ['रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
+  const months = ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
+  const now = new Date();
+  document.getElementById("livePanchangHeader").textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+}
+
+function printLedgerSlip(){
+  const c = customers.find(x => x.id === active);
+  if(!c) return;
+  const b = bal(c);
+  const pArea = document.getElementById("universalPrintArea");
+  let txRows = "";
+
+  (c.tx || []).slice(-15).forEach(t => {
+    txRows += `<tr>
+      <td style="padding:4px 2px;border-bottom:1px dashed #cbd5e1;">${t.date}</td>
+      <td style="padding:4px 2px;border-bottom:1px dashed #cbd5e1;">${esc(t.note||'-')}</td>
+      <td style="padding:4px 2px;text-align:right;border-bottom:1px dashed #cbd5e1;color:${t.type==='give'?'#e11d48':'#059669'};">
+        ${t.type==='give'?'+':'-'}₹${t.amount}
+      </td>
+    </tr>`;
+  });
+
+  pArea.innerHTML = `
+    <div class="paper-a4" style="background:#fff;">
+      <div style="text-align:center;border-bottom:1px dashed #000;padding-bottom:5px;">
+        <h2 style="font-size:16px;margin:0;font-weight:900;">${esc(profile.shopName)}</h2>
+        <p style="font-size:10px;margin:2px 0;">खाता पर्ची | मो.: ${esc(profile.shopPhone)}</p>
+      </div>
+      <div style="margin:8px 0;font-size:11px;">
+        <div><b>खाता:</b> ${esc(c.name)} (📞 ${esc(c.phone)})</div>
+        ${c.address ? `<div><b>पता:</b> ${esc(c.address)}</div>`:''}
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:10px;">
+        <thead>
+          <tr style="border-top:1px solid #000;border-bottom:1px solid #000;">
+            <th style="text-align:left;padding:3px 2px;">दिनांक</th>
+            <th style="text-align:left;padding:3px 2px;">विवरण</th>
+            <th style="text-align:right;padding:3px 2px;">राशि</th>
+          </tr>
+        </thead>
+        <tbody>${txRows || '<tr><td colspan="3" style="text-align:center;padding:5px;">कोई लेन-देन नहीं</td></tr>'}</tbody>
+      </table>
+      <div style="border-top:1px solid #000;padding-top:6px;margin-top:6px;text-align:right;font-size:13px;font-weight:bold;">
+        कुल शेष: <span style="color:${b>=0?'#e11d48':'#059669'};">${b>=0?'लेना है: ':'देना है: '}₹${Math.abs(b)}</span>
+      </div>
+      <div style="margin-top:10px;text-align:center;font-size:8.5px;border-top:1px dotted #666;padding-top:4px;">
+        Powered by चुपाकाबरा खाता 🐉
+      </div>
+    </div>
+  `;
+  setTimeout(() => { window.print(); pArea.innerHTML = ""; }, 250);
+}
+
+function printExpenseSlip(){
+  const pArea = document.getElementById("universalPrintArea");
+  const now = new Date();
+  const mKey = `${now.getMonth()+1}-${now.getFullYear()}`;
+  const curr = expenses.filter(e => e.monthKey === mKey);
+  if(!curr.length){ toast("इस महीने कोई खर्च दर्ज नहीं है!"); return; }
+
+  let tot = 0, rows = "";
+  curr.forEach((e, idx) => {
+    tot += Number(e.amount||0);
+    rows += `<tr>
+      <td style="padding:4px 2px;border-bottom:1px solid #cbd5e1;text-align:center;">${idx+1}</td>
+      <td style="padding:4px 2px;border-bottom:1px solid #cbd5e1;">${esc(e.date)}</td>
+      <td style="padding:4px 2px;border-bottom:1px solid #cbd5e1;">${esc(e.note)}</td>
+      <td style="padding:4px 2px;border-bottom:1px solid #cbd5e1;">${esc(e.category)}</td>
+      <td style="padding:4px 2px;border-bottom:1px solid #cbd5e1;text-align:right;">₹${Number(e.amount).toLocaleString("en-IN")}</td>
+    </tr>`;
+  });
+
+  pArea.innerHTML = `
+    <div class="paper-a4" style="background:#fff;">
+      <div style="text-align:center;border-bottom:2px solid #075c43;padding-bottom:8px;margin-bottom:10px;">
+        <h2 style="font-size:18px;margin:0;color:#075c43;font-weight:900;">${esc(profile.shopName)}</h2>
+        <p style="font-size:11.5px;color:#475569;margin:2px 0;">गद्दी रोज़नामचा • मासिक खर्च विवरण</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead>
+          <tr style="background:#f8fafc;border-top:1px solid #075c43;border-bottom:1px solid #075c43;">
+            <th style="padding:4px 2px;width:8%;">#</th>
+            <th style="padding:4px 2px;width:22%;text-align:left;">दिनांक</th>
+            <th style="padding:4px 2px;width:38%;text-align:left;">विवरण</th>
+            <th style="padding:4px 2px;width:18%;text-align:left;">श्रेणी</th>
+            <th style="padding:4px 2px;width:14%;text-align:right;">रकम</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="border-top:2px solid #075c43;padding-top:6px;margin-top:8px;text-align:right;font-size:14px;font-weight:900;">
+        कुल मासिक खर्च: ₹${tot.toLocaleString("en-IN")}
+      </div>
+      <div style="margin-top:40px;display:flex;justify-content:space-between;font-size:9px;color:#64748b;">
+        <div>Powered by चुपाकाबरा खाता 🐉</div>
+        <div style="text-align:center;font-size:11px;color:#000;border-top:1px solid #000;width:120px;">हस्ताक्षर</div>
+      </div>
+    </div>
+  `;
+  setTimeout(() => { window.print(); pArea.innerHTML = ""; }, 250);
+}
+
+function fetchCurrentLocation(target){
+  if(!navigator.geolocation){ alert("GPS उपलब्ध नहीं है!"); return; }
+  toast("सैटेलाइट से GPS लोकेशन ली जा रही है... 📍");
+  navigator.geolocation.getCurrentPosition(pos => {
+    const link = `https://maps.google.com/?q=${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
+    if(target === 'pharma') document.getElementById("setPhMap").value = link;
+    else document.getElementById("setClinicMap").value = link;
+    toast("GPS लोकेशन लिंक सेट हुआ! 📍✓");
+  }, err => { alert("GPS अनुमति दें या मैन्युअल मैप लिंक भरें!"); }, { enableHighAccuracy: true });
+}
+
+function openGameModal(){
+  document.getElementById("gameVaultBal").textContent = vault.toFixed(2);
+  document.getElementById("modalChaiCount").textContent = reactions.chai;
+  document.getElementById("modalKutaiCount").textContent = reactions.kutai;
+  document.getElementById("gameModal").style.display = "flex";
+}
+
+function openBankingHub(){ document.getElementById("bankingModal").style.display = "flex"; }
+function openTurtlemintInsurance(){ window.open(TURTLEMINT_URL, "_blank"); }
+
+// 19. ऐप इनिशियलाइज़ेशन
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const splash = document.getElementById("splashScreen");
+    if (splash) {
+      splash.style.opacity = "0";
+      splash.style.visibility = "hidden";
+      setTimeout(() => splash.remove(), 600);
+    }
+  }, 400);
+
+  checkAppSecurityLock();
+  updateLivePanchang();
+  profileUI();
+  updateDashboardSummary();
+  renderCustomerList();
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
